@@ -1,0 +1,57 @@
+<div class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Generación de Grupos Automática</h2>
+
+    <form [formGroup]="frmGroupAssignment" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm border">
+        
+        <div class="field">
+            <label class="font-bold block mb-2">Escuela</label>
+            <p-select [options]="listSchool" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" class="w-full" />
+        </div>
+
+        <div class="field">
+            <label class="font-bold block mb-2">Buscar Curso</label>
+            <p-autoComplete 
+                formControlName="courseObject"
+                [suggestions]="courseSuggestions" 
+                (completeMethod)="searchCourse($event)" 
+                optionLabel="nameCourse" 
+                dataKey="idCourse" 
+                [delay]="300" 
+                (onSelect)="loadUnassignedStudents()"
+                placeholder="Escribe el nombre del curso..."
+                [dropdown]="false"
+                styleClass="w-full">
+            </p-autoComplete>
+        </div>
+    </form>
+
+    <div class="border rounded-md overflow-hidden bg-white shadow-sm">
+        <div class="flex justify-between items-center bg-gray-50 p-4 border-b">
+            <span class="font-bold text-gray-800">Alumnos Pendientes de Grupo: {{ unassignedStudents.length }}</span>
+            <p-button label="Generar y Asignar" severity="success" styleClass="rounded-full px-6 bg-green-500 border-green-500" [disabled]="unassignedStudents.length === 0 || frmGroupAssignment.invalid" (click)="assignRandomGroups()" />
+        </div>
+
+        <table class="w-full text-left border-collapse">
+            <thead class="border-b bg-gray-100">
+                <tr>
+                    <th class="p-3 text-sm font-bold text-gray-800">Código</th>
+                    <th class="p-3 text-sm font-bold text-gray-800">Nombre del Alumno</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if(unassignedStudents.length === 0) {
+                    <tr>
+                        <td colspan="2" class="p-6 text-center text-gray-500">Seleccione un curso para ver a los alumnos pendientes.</td>
+                    </tr>
+                } @else {
+                    @for(student of unassignedStudents; track $index) {
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="p-3">{{ student.code }}</td>
+                            <td class="p-3 font-semibold">{{ student.fullName }}</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

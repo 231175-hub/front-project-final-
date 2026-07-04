@@ -1,0 +1,118 @@
+<div class="surface-ground px-4 py-5 md:px-6 lg:px-8">
+    
+    <div class="flex flex-column md:flex-row justify-content-between align-items-center mb-5 bg-white p-4 shadow-2 border-round border-top-3 border-primary">
+        <div>
+            <h1 class="m-0 text-900 font-bold text-2xl">Récord Académico</h1>
+            <p class="mt-2 mb-0 text-600">Gestión de notas y asistencias del semestre actual</p>
+        </div>
+        
+        <!-- CONTENEDOR DE BOTONES -->
+        <div class="mt-3 md:mt-0 flex gap-2">
+            <!-- Botón Historial (Nuevo) -->
+            <p-button label="Historial Académico" 
+                      icon="pi pi-history" 
+                      (onClick)="previewHistory()" 
+                      severity="secondary"
+                      [loading]="isDownloadingHistorial">
+            </p-button>
+
+            <!-- Botón Constancia -->
+            <p-button label="Constancia de Matrícula" 
+                      icon="pi pi-file-pdf" 
+                      (onClick)="previewCertificate()" 
+                      severity="danger"
+                      [loading]="isDownloadingConstancia"
+                      [disabled]="loading || !boletas || boletas.length === 0">
+            </p-button>
+        </div>
+    </div>
+
+    <div *ngIf="loading" class="text-center p-5">
+        <i class="pi pi-spin pi-spinner text-primary text-4xl"></i>
+        <p class="text-600 mt-2 font-medium">Cargando tus boletas del semestre desde Google Sheets...</p>
+    </div>
+
+    <div *ngIf="!loading && (!boletas || boletas.length === 0)" class="surface-card p-5 shadow-2 border-round text-center">
+        <i class="pi pi-exclamation-circle text-orange-500 text-4xl mb-3"></i>
+        <p class="text-900 font-medium text-xl">{{ errorMensaje || 'No figuras matriculado en ningún curso este semestre.' }}</p>
+    </div>
+
+    <div *ngIf="!loading && boletas && boletas.length > 0">
+        <div *ngFor="let boleta of boletas" class="surface-card p-4 shadow-2 border-round mb-5 animate-fade-in">
+            
+            <div class="flex flex-column md:flex-row justify-content-between align-items-center mb-4 border-bottom-1 surface-border pb-3">
+                <div>
+                    <div class="text-900 font-bold text-2xl mb-2 text-primary">{{ boleta.nombreCurso }}</div>
+                    <div class="text-600 font-medium">Código: {{ boleta.codigoCurso }} | Grupo: {{ boleta.seccion }}</div>
+                </div>
+                <div class="flex align-items-center gap-3 mt-3 md:mt-0">
+                    <span class="bg-blue-50 text-blue-700 font-bold px-3 py-2 border-round border border-blue-200">Créditos: {{ boleta.creditos }}.0</span>
+                </div>
+            </div>
+
+            <div class="border surface-border border-round overflow-hidden mb-4 shadow-1">
+                <div class="flex bg-teal-800 text-white font-bold p-3">
+                    <div class="w-9">Componente de Evaluación</div>
+                    <div class="w-3 text-center">Nota Obtenida</div>
+                </div>
+
+                <ng-container *ngFor="let unidad of boleta.unidadesProcesadas">
+                    <div class="bg-gray-100 text-600 font-bold p-2 pl-3 border-bottom-1 surface-border uppercase text-sm tracking-wide">
+                        UNIDAD {{ unidad.numero }}
+                    </div>
+
+                    <div class="flex p-3 border-bottom-1 surface-border hover:surface-100 transition-colors align-items-center">
+                        <div class="w-9 pl-4 text-700 font-medium">Nota Conceptual (CC{{ unidad.numero }})</div>
+                        <div class="w-3 text-center font-bold text-lg text-900">{{ unidad.conceptual }}</div>
+                    </div>
+                    <div class="flex p-3 border-bottom-1 surface-border hover:surface-100 transition-colors align-items-center">
+                        <div class="w-9 pl-4 text-700 font-medium">Nota Procedimental (CP{{ unidad.numero }})</div>
+                        <div class="w-3 text-center font-bold text-lg text-900">{{ unidad.procedimental }}</div>
+                    </div>
+                    <div class="flex p-3 border-bottom-1 surface-border hover:surface-100 transition-colors align-items-center">
+                        <div class="w-9 pl-4 text-700 font-medium">Nota Actitudinal (CA{{ unidad.numero }})</div>
+                        <div class="w-3 text-center font-bold text-lg text-900">{{ unidad.actitudinal }}</div>
+                    </div>
+
+                    <div class="flex bg-teal-50 p-3 border-bottom-1 border-teal-100 align-items-center">
+                        <div class="w-9 text-right font-bold text-teal-800 pr-4">Promedio Unidad {{ unidad.numero }}:</div>
+                        <div class="w-3 text-center font-bold text-xl" 
+                             [ngClass]="{'text-red-500': unidad.promedio < 10.5 && unidad.promedio !== '-', 'text-teal-900': unidad.promedio >= 10.5 || unidad.promedio === '-'}">
+                            {{ unidad.promedio }}
+                        </div>
+                    </div>
+                </ng-container>
+
+                <div class="flex surface-200 p-4 align-items-center border-top-1 surface-border">
+                    <div class="w-9 text-right font-black text-900 text-lg pr-4">PROMEDIO FINAL DE CURSO:</div>
+                    <div class="w-3 text-center font-black text-3xl"
+                         [ngClass]="{'text-red-600': boleta.promedioGeneral < 10.5 && boleta.promedioGeneral !== '-', 'text-primary': boleta.promedioGeneral >= 10.5 || boleta.promedioGeneral === '-'}">
+                        {{ boleta.promedioGeneral }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pb-2">
+                <div class="text-800 font-bold mb-3 flex align-items-center gap-2">
+                    <i class="pi pi-calendar-times text-primary"></i>
+                    <span>Control de Asistencias del Curso</span>
+                </div>
+                <div class="flex gap-3 flex-column sm:flex-row justify-content-between">
+                    <div class="flex align-items-center justify-content-center bg-green-50 text-green-700 border border-green-200 border-round p-3 flex-1 font-medium shadow-1">
+                        <span class="font-black text-2xl mr-2">{{ boleta.asistencia?.['A'] ?? 0 }}</span> Asistencias (A)
+                    </div>
+                    <div class="flex align-items-center justify-content-center bg-yellow-50 text-yellow-700 border border-yellow-200 border-round p-3 flex-1 font-medium shadow-1">
+                        <span class="font-black text-2xl mr-2">{{ boleta.asistencia?.['T'] ?? 0 }}</span> Tardanzas (T)
+                    </div>
+                    <div class="flex align-items-center justify-content-center bg-red-50 text-red-700 border border-red-200 border-round p-3 flex-1 font-medium shadow-1">
+                        <span class="font-black text-2xl mr-2">{{ boleta.asistencia?.['F'] ?? 0 }}</span> Faltas (F)
+                    </div>
+                    <div class="flex align-items-center justify-content-center bg-blue-50 text-blue-700 border border-blue-200 border-round p-3 flex-1 font-medium shadow-1">
+                        <span class="font-black text-2xl mr-2">{{ boleta.asistencia?.['J'] ?? 0 }}</span> Justificadas (J)
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

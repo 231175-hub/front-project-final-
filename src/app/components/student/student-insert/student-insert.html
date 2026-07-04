@@ -1,0 +1,45 @@
+<form [formGroup]="frmInsertStudent">
+    <div class="card flex justify-center">
+        <label for="school">Escuela Academico Profesional</label>
+        <p-select [options]="listSchool" id="school" optionValue="idSchool" [filter]="true" formControlName="idSchool" optionLabel="nameSchool" placeholder="Seleccione una Escuela" class="w-full md:w-56" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="firtsName">Ingrese el nombre del Estudiante</label>
+        <input type="text" id="firtsName" pInputText formControlName="firstName" placeholder="Nombres" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="surName">Ingrese los apellidos del Estudiante</label>
+        <input type="text" id="surName" pInputText formControlName="surName" placeholder="Apellidos" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="email">Ingrese el email del Estudiante</label>
+        <input type="email" id="email" pInputText formControlName="email" placeholder="Email" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="password">Ingrese la Contraseña</label>
+        <p-password formControlName="password" id="password" [toggleMask]="true" [feedback]="false" autocomplete="off" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="code">Ingrese el codigo</label>
+        <input type="text" id="code" pInputText formControlName="code" placeholder="Codigo del Alumno" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="currentSemester">Ingrese el semestre actual</label>
+        <input type="text" id="currentSemester" pInputText formControlName="currentSemester" placeholder="Semestre Actual" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="totalCredits">Creditos Totales</label>
+        <input type="text" id="totalCredits" pInputText formControlName="totalCredits" placeholder="Creditos Totales" />
+    </div>
+
+    <div class="card flex justify-center">
+        <p-button (click)="sendInsertStudent($event)">Guardar Estudiante</p-button>
+    </div>
+</form>

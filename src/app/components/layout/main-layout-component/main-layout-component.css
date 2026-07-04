@@ -1,0 +1,45 @@
+:host ::ng-deep .p-panelmenu {
+    border: none;
+}
+
+:host ::ng-deep .p-panelmenu .p-panelmenu-header > a {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-color) !important;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    border-radius: 8px;
+}
+
+:host ::ng-deep .p-panelmenu .p-panelmenu-header > a:hover {
+    background-color: var(--surface-hover) !important;
+    color: var(--primary-color) !important;
+}
+
+:host ::ng-deep .p-panelmenu .p-panelmenu-header > a:hover .p-menuitem-icon,
+:host ::ng-deep .p-panelmenu .p-panelmenu-header.p-highlight > a .p-menuitem-icon {
+    color: var(--primary-color) !important;
+}
+
+:host ::ng-deep .p-panelmenu .p-panelmenu-content {
+    background: transparent !important;
+    border: none !important;
+    padding: 0.5rem 0;
+}
+
+:host ::ng-deep .p-panelmenu .p-panelmenu-content .p-menuitem > .p-menuitem-link {
+    background: transparent !important;
+    padding: 0.75rem 1rem 0.75rem 3rem; 
+    border-radius: 6px;
+    margin: 0 0.5rem;
+    transition: all 0.2s;
+}
+
+:host ::ng-deep .p-panelmenu .p-panelmenu-content .p-menuitem > .p-menuitem-link:hover {
+    background-color: var(--surface-hover) !important;
+}
+
+:host ::ng-deep .p-button-danger.p-button-text:hover {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+}

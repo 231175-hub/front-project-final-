@@ -1,0 +1,32 @@
+<!-- Componente Toast para mostrar notificaciones emergentes -->
+<p-toast></p-toast>
+
+<div class="flex justify-content-center mt-6">
+    <div class="surface-card p-5 shadow-2 border-round-2xl w-full sm:w-8 md:w-6 lg:w-4 text-center">
+        
+        <div class="text-900 font-bold text-2xl mb-2">Mi Perfil</div>
+        <p class="mt-0 mb-4 p-0 text-600">Personaliza tu foto de perfil para el Sistema Académico.</p>
+        
+        <!-- Foto de perfil grande -->
+        <div class="mb-4 relative flex justify-content-center">
+            <img [src]="profilePicUrl" alt="Foto de perfil" class="w-12rem h-12rem border-circle object-cover shadow-3 border-2 border-primary transition-all transition-duration-300">
+        </div>
+
+        <!-- Datos del usuario -->
+        <div class="font-bold text-xl text-900 mb-1">{{ usernameLogueado }}</div>
+        <div class="text-600 mb-1"><i class="pi pi-envelope mr-2 text-sm"></i>{{ email }}</div>
+        <div class="text-primary font-medium mb-5"><i class="pi pi-briefcase mr-2 text-sm"></i>{{ role | uppercase }}</div>
+
+        <!-- Input de archivo REAL (Oculto para no dañar el diseño) -->
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden" style="display: none;">
+
+        <div class="flex flex-column gap-3 w-full">
+            <!-- Botón estético que hace clic en el input oculto -->
+            <button pButton pRipple label="Elegir nueva foto" icon="pi pi-image" class="p-button-outlined p-button-lg w-full justify-content-center" (click)="fileInput.click()"></button>
+            
+            <!-- Este botón solo aparece si el usuario ya eligió una foto -->
+            <button *ngIf="selectedFile" pButton pRipple label="Actualizar foto de perfil" icon="pi pi-upload" class="p-button-primary p-button-lg w-full justify-content-center" [loading]="isUploading" (click)="uploadProfilePicture()"></button>
+        </div>
+
+    </div>
+</div>

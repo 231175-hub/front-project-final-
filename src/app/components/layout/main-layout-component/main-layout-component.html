@@ -1,0 +1,41 @@
+<div class="layout-container min-h-screen surface-ground flex flex-column">
+    
+    <header class="shadow-2 z-2 sticky top-0">
+        <p-megamenu [model]="itemsMega" id="megamenu" [style]="{ display: 'flex', 'border-radius': '0', 'border': 'none' }" class="p-3 surface-0">
+            <ng-template #start>
+                <img src="/unamba-logo.png" alt="unamba-logo" id="unamba-logo" class="h-3rem mr-4">
+            </ng-template>
+            
+            <ng-template #item let-item>
+                <a *ngIf="item.root" class="flex align-items-center cursor-pointer px-4 py-2 font-bold text-xl text-primary" style="background: transparent !important; text-decoration: none;">
+                    <i [ngClass]="item.icon"></i>
+                    <span class="ml-2">{{ item.label }}</span>
+                </a>
+            </ng-template>
+    
+            <ng-template #end>
+                <div class="flex align-items-center gap-3">
+                    <span class="font-medium text-sm hidden md:inline text-700">Hola, {{ usernameLogueado }}</span>
+                    
+                    <img [src]="profilePicUrl" (click)="goToProfile()" alt="Foto de perfil" class="w-2rem h-2rem border-circle object-cover shadow-1 cursor-pointer hover:shadow-2 transition-duration-200" title="Ver Mi Perfil" />
+
+                    <button pButton pRipple type="button" icon="pi pi-sign-out" label="Salir" class="p-button-text p-button-danger p-button-sm ml-2" (click)="logout()"></button>
+                </div>
+            </ng-template>
+        </p-megamenu>
+    </header>
+
+    <div class="flex flex-grow-1 flex-row p-4 gap-4 align-items-start w-full max-w-screen-2xl mx-auto">
+        
+        <aside class="w-20rem flex-shrink-0 sticky top-5rem z-1 hidden lg:block">
+            <div class="surface-card shadow-1 border-round-xl p-2">
+                <p-panelmenu [model]="itemsMenu" id="panelmenu" [multiple]="false">
+                    </p-panelmenu>
+            </div>
+        </aside>
+    
+        <main class="flex-1 min-w-0 surface-card border-round-xl p-5 shadow-1">
+            <router-outlet></router-outlet>
+        </main>
+    </div>
+</div>

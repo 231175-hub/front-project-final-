@@ -1,1 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+@theme {
+  --color-unamba-blue: #002D62;
+  --color-unamba-yellow: #FFD700;
+}

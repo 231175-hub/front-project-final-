@@ -1,0 +1,27 @@
+<div>   
+    <form [formGroup]="frmInsertProfessor">
+        <div class="card flex justify-center">
+            <label for="firstName">Ingrese el nombre completo</label>
+            <input type="text" id="firstName" pInputText formControlName="firstName" placeholder="Nombre"/>
+        </div>
+
+        <div class="card flex justify-center">
+            <label for="surName">Ingrese los apellidos completo</label>
+            <input type="text" id="surName" pInputText formControlName="surName" placeholder="Apellidos"/>
+        </div>
+
+        <div class="card flex justify-center">
+            <label for="email">Ingrese el email</label>
+            <input type="text" id="email" pInputText formControlName="email" placeholder="Email"/>
+        </div>
+
+        <div class="card flex justify-center">
+            <label for="password">Ingrese la Contraseña</label>
+            <p-password formControlName="password" id="password" [toggleMask]="true" [feedback]="false" autocomplete="off" />
+        </div>
+
+        <div class="card flex justify-center">
+            <p-button (click)="sendInsertProfessor($event)" label="Submit" />
+        </div>
+    </form>
+</div>

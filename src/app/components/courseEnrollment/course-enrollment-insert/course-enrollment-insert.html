@@ -1,0 +1,76 @@
+<div>
+    <form [formGroup]="frmCourseEnrollmentInsert">
+        <p-select [options]="listSchool" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" class="w-full" />
+
+        <div class="field">
+            <label for="alumno" class="font-bold block mb-2">Buscar Alumno</label>
+            <p-autoComplete 
+                inputId="alumno"
+                formControlName="idStudent"
+                [suggestions]="studentSuggestion" 
+                (completeMethod)="searchStudent($event)" 
+                optionLabel="fullName" 
+                dataKey="idStudent" 
+                [delay]="300" 
+                placeholder="Escribe el nombre o Código..."
+                [dropdown]="false"
+                styleClass="w-full">
+                
+                <ng-template let-alumno pTemplate="item">
+                    <div class="flex align-items-center">
+                        <span class="font-bold text-gray-800">{{ alumno.fullName }}</span>
+                        <span class="ml-2 text-gray-500 text-sm"> (Código: {{ alumno.code }})</span>
+                    </div>
+                </ng-template>
+            </p-autoComplete>
+        </div>
+    </form>
+    <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-4 mb-2">
+            <p-button label="Matricular Estudiantes" styleClass="bg-black hover:bg-gray-800 border-black text-white rounded-full px-4" (click)="addCourse()" />
+            <span class="text-red-300 font-semibold text-sm">Ingrese los cursos a matricular</span>
+        </div>
+
+        <div class="border rounded-md overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="border-b bg-gray-50">
+                    <tr>
+                        <th class="p-3 text-sm font-bold text-gray-800 text-center">Descripción</th>
+                        <th class="p-3 text-sm font-bold text-gray-800 text-center w-32">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for(value of courseRowList; track $index) {
+                        <tr class="border-b last:border-none">
+                            <td class="p-2 text-center">
+                                <div class="card flex justify-center">
+                                    <div class="field">
+                                        <label class="font-bold block mb-2">Buscar Curso</label>
+                                        <p-autoComplete 
+                                            formControlName="courseObject"
+                                            [suggestions]="courseSuggestions" 
+                                            (completeMethod)="searchCourse($event)" 
+                                            optionLabel="nameCourse" 
+                                            dataKey="idCourse" 
+                                            [delay]="300" 
+                                            placeholder="Escribe el nombre del curso..."
+                                            [dropdown]="false"
+                                            styleClass="w-full">
+                                        </p-autoComplete>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-2 text-center">
+                                <p-button label="Retirar" severity="danger" styleClass="bg-orange-500 hove:bg-orange-600 border-orange-600 text-white rounded-full p-button-sm px-4" (click)="removeCourse(value)" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="flex justify-end border-t pt-4 mt-2">
+    <p-button label="Registrar datos" (click)="sendInsertEnrollment($event)" severity="info" styleClass="rounded-full px-6" />
+</div>

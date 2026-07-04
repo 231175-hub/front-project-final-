@@ -1,0 +1,27 @@
+<div>   
+    <form [formGroup]="frmInsertAdmin">
+        <div class="card flex justify-center">
+            <label for="firtsName">Nombres</label>
+            <input type="text" id="firtsName" pInputText formControlName="firstName" placeholder="Nombre"/>
+        </div>
+
+        <div class="card flex justify-center">
+            <label for="surName">Nombres</label>
+            <input type="text" id="surName" pInputText formControlName="surName" placeholder="Apellidos"/>
+        </div>
+
+        <div class="card flex justify-center">
+            <label for="email">Email</label>
+            <input type="text" id="email" pInputText formControlName="email" placeholder="Email"/>
+        </div>
+
+        <div class="card flex justify-center">
+            <label for="password">Contraseña</label>
+            <p-password formControlName="password" id="password" [toggleMask]="true"  [feedback]="false" autocomplete="off" />
+        </div>
+
+        <div class="card flex justify-center">
+            <p-button (click)="sendInsertAdmin($event)" label="Submit" />
+        </div>
+    </form>
+</div>

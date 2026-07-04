@@ -1,0 +1,41 @@
+<form id="form" [formGroup]="frmUpdateAcademicPeriod"  class="card flex flex-wrap justify-center items-end gap-4">
+    <div>
+        <label for="anio">Año</label>
+        <input pInputText id="anio" formControlName="yearPeriod" autocomplete="off" /> 
+    </div>
+
+    <div>
+        <label for="period">Periodo</label>
+        <input pInputText id="period" formControlName="numberPeriod" autocomplete="off" />
+    </div>
+
+    <div class="card flex justify-center gap-4 flex-wrap">
+        <label for="startDate">Fecha de inicio del Periodo</label>
+        <p-datepicker id="startDate" formControlName="startDate" [showButtonBar]="true" placeholder="Fecha de inicio" />
+    </div>
+
+    <div class="card flex justify-center gap-4 flex-wrap">
+        <label for="endDate">Fecha de fin del Periodo</label>
+        <p-datepicker id="endDate" formControlName="endDate" [showButtonBar]="true" placeholder="Fecha de Culminación" />
+    </div>
+
+    <div class="card flex justify-center">
+        <label for="status">Actualizar Estado</label>
+        <p-select [options]="statuses" id="status" formControlName="status" optionValue="status" optionLabel="status" placeholder="Estados" class="w-full md:w-56" />
+    </div>
+
+    <div class="card flex justify-center pt-2">
+        <p-toast />
+        <p-confirmdialog>
+            <ng-template #message let-message>
+                @if (message) {
+                    <div class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700">
+                        <i [ngClass]="message.icon" class="text-6xl text-primary-500"></i>
+                        <p>{{ message.message }}</p>
+                    </div>
+                }
+            </ng-template>
+        </p-confirmdialog>
+        <p-button (click)="sendInsertAcademicPeriod($event)" label="Save" />
+    </div>
+</form>

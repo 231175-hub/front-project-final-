@@ -1,0 +1,16 @@
+<div id="card" class="flex flex-wrap gap-4 justify-center">
+    <div *ngFor="let school of schoolList" class="flex">
+        <p-card [style]="{ width: '25rem', height: '350px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }">
+            <ng-template #header>
+                <img [alt]="school.nameSchool" [src]="school.urlImageSchool" style="width: 100%; height: 220px; object-fit: cover; display: block;" />
+            </ng-template>
+            <ng-template #title style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;"> {{ school.nameSchool }} </ng-template>
+            <ng-template #footer>
+                <div class="flex gap-4 mt-2">
+                    <p-button label="Eliminar" severity="secondary" (click)="delete(school.idSchool)" class="w-full" [outlined]="true" styleClass="w-full" />
+                    <p-button label="Actualizar" class="w-full" styleClass="w-full" (click)="navigate($event, school.idSchool)"/>
+                </div>
+            </ng-template>
+        </p-card>
+    </div>
+</div>
