@@ -1,8 +1,9 @@
 export const enviroments = {
-    production: false,
-    URL_BASE: 'http://localhost:8081/intranet',
-    URL_NORMAL: 'http://localhost:8081/',
-    URL_KEYCLOAK: 'http://localhost:8080'
+    production: true,
+    URL_BASE: 'https://back-project-final-production.up.railway.app/intranet',
+    URL_NORMAL: 'https://back-project-final-production.up.railway.app/',
+    URL_KEYCLOAK: 'https://keycloak-production-2bb1.up.railway.app' // Reemplaza esto con la URL de tu Keycloak en Railway
 }
+
 
 
