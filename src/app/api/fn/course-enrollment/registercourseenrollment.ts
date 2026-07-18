@@ -10,7 +10,7 @@ import { RequestBuilder } from '../../request-builder';
 
 export interface Registercourseenrollment$Params {
       body?: {
-'courses'?: string[];
+'courses'?: string;
 'idStudent'?: string;
 }
 }

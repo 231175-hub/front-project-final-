@@ -1,63 +1,62 @@
-<div class="overflow-x-auto shadow-md sm:rounded-lg bg-white p-6 m-4 border border-gray-200">
+<p-toast></p-toast>
+<div class="schedule-container overflow-x-auto">
   
-  <div class="mb-4">
-    <h2 class="text-xl font-bold text-gray-800">My Class Schedule</h2>
-    <p class="text-sm text-gray-500 mb-3">Current Academic Semester</p>
+  <div class="mb-4 flex flex-column sm:flex-row justify-content-between align-items-start sm:align-items-center gap-3">
+    <div>
+      <h2 class="schedule-title">Mi Horario de Clases</h2>
+      <p class="schedule-subtitle">Semestre Académico Actual</p>
+    </div>
     
-    <!-- BOTÓN AGREGADO AQUÍ (Sin romper tu diseño) -->
-    <button (click)="previewSchedulePdf()" [disabled]="isDownloadingPdf" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-md shadow-sm">
-      @if (isDownloadingPdf) {
-        <i class="pi pi-spin pi-spinner mr-2"></i>Generando...
-      } @else {
-        <i class="pi pi-file-pdf mr-2"></i>Imprimir Horario PDF
-      }
-    </button>
+    <p-button 
+        label="Imprimir Horario PDF" 
+        icon="pi pi-file-pdf" 
+        (onClick)="previewSchedulePdf()" 
+        styleClass="btn-print-pdf"
+        [loading]="isDownloadingPdf">
+    </p-button>
   </div>
 
-  <table class="w-full text-sm text-left text-gray-500 border-collapse table-fixed">
-    <thead class="text-xs text-gray-700 uppercase bg-gray-100">
-      <tr>
-        <th class="px-4 py-3 border border-gray-300 w-24 text-center bg-gray-200 shadow-sm">Time</th>
-        @for (day of daysOfWeek; track day) {
-          <th class="px-4 py-3 border border-gray-300 text-center text-gray-800">{{ day }}</th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      @for (hour of hours; track hour) {
-        <tr class="bg-white border-b hover:bg-gray-50 transition-colors">
-          
-          <td class="px-2 py-3 font-semibold text-gray-700 border border-gray-300 text-center align-top bg-gray-50 shadow-sm w-24">
-            <span class="block text-sm">{{ hour }}:00</span>
-            <span class="block text-xs text-gray-400 font-normal">{{ hour + 1 }}:00</span>
-          </td>
-          
-          @for (day of daysOfWeek; track day) {
-            
-            @if (!customSchedule[day + '-' + hour]?.skip) {
-              
-                <td [attr.rowspan]="customSchedule[day + '-' + hour]?.duration || 1"
-                    class="border border-gray-200 align-top relative p-0"
-                    [style.height.px]="(customSchedule[day + '-' + hour]?.duration || 1) * 80"> 
-                    
-                    @if (customSchedule[day + '-' + hour]) {
-                        <div class="bg-blue-50 border-l-4 border-blue-600 text-blue-900 w-full h-full p-3 flex flex-col justify-center hover:bg-blue-100 transition-colors cursor-default">
-                            
-                            <span class="font-bold text-[11px] uppercase leading-tight line-clamp-2">
-                                {{ customSchedule[day + '-' + hour].courseName }} - Group {{ customSchedule[day + '-' + hour].groupName }}
-                            </span>
-                            
-                            <span class="text-[10px] mt-1.5 font-medium text-blue-700 flex items-center">
-                                <i class="pi pi-map-marker mr-1"></i> 
-                                Room {{ customSchedule[day + '-' + hour].classroom }}
-                            </span>
-                        </div>
-                    }
-                </td>
-            }
-          }
-        </tr>
+  <div class="calendar-grid">
+    <div class="grid-header-cell time-col">Hora</div>
+    @for (day of daysOfWeek; track day) {
+      <div class="grid-header-cell">{{ dayLabels[day] }}</div>
+    }
+
+    @for (hour of hours; track hour) {
+      <div class="grid-time-label" [style.grid-row]="getHourGridRow(hour)">
+        <span class="font-bold">{{ hour }}:00</span>
+        <span class="hour-range">{{ hour + 1 }}:00</span>
+      </div>
+
+      @for (day of daysOfWeek; track day) {
+        <div class="grid-bg-slot"
+             [style.grid-row]="getHourGridRow(hour)"
+             [style.grid-column]="getDayGridCol(day)">
+        </div>
       }
-    </tbody>
-  </table>
+    }
+
+    @for (cell of placedLessons; track cell.key) {
+      <div class="grid-course-card"
+           [style.grid-row]="cell.gridRow"
+           [style.grid-column]="cell.gridColumn"
+           [class.split-card]="cell.lessons.length > 1">
+        <div class="courses-cell-container">
+          @for (lesson of cell.lessons; track lesson) {
+            <div class="course-card-inner">
+              <span class="course-name" [title]="lesson.courseName">
+                {{ lesson.courseName }}
+              </span>
+              <span class="course-group">
+                Grupo {{ lesson.groupName }}
+              </span>
+              <span class="course-room">
+                <i class="pi pi-map-marker"></i> Aula {{ lesson.classroom }}
+              </span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
 </div>

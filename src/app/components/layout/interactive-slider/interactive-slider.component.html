@@ -1,0 +1,38 @@
+<div class="slider-container">
+  <div class="slider">
+    <!-- Diapositivas dinámicas -->
+    <div 
+      *ngFor="let item of items; let i = index; trackBy: trackById" 
+      class="slide-item" 
+      [ngClass]="getSlotClass(i)"
+      [style.backgroundImage]="'linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)), url(' + item.image + ')'"
+    >
+      <div class="slide-content">
+        <span class="slide-subtitle block uppercase text-sm font-bold tracking-wider text-amber-500">
+          {{ item.subtitle }}
+        </span>
+        <h1 class="slide-title font-bold text-white uppercase leading-tight my-2">
+          {{ item.title }}
+        </h1>
+        <p class="slide-description text-sm opacity-90 leading-relaxed mb-4">
+          {{ item.description }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controles (Botones y progreso) -->
+  <div class="slider-controls flex align-items-center gap-4">
+    <div class="nav-buttons flex gap-2">
+      <button pButton pRipple type="button" icon="pi pi-angle-left" 
+              class="p-button-rounded p-button-outlined nav-btn" (click)="prev()"></button>
+      <button pButton pRipple type="button" icon="pi pi-angle-right" 
+              class="p-button-rounded p-button-outlined nav-btn" (click)="next()"></button>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" [style.width.%]="progressPercentage"></div>
+    </div>
+  </div>
+</div>

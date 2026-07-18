@@ -1,0 +1,80 @@
+<p-toast [life]="2000"></p-toast>
+
+<div class="flex flex-column gap-4 p-4">
+    <!-- Header banner -->
+    <div class="flex justify-content-between align-items-center mb-4 pb-3 border-bottom-1 surface-border">
+        <div>
+            <h2 class="text-2xl font-bold text-900 m-0">Comunicados y Documentos</h2>
+            <p class="text-500 text-sm mt-1 m-0">
+                Consulte las últimas publicaciones y archivos oficiales de su escuela profesional.
+            </p>
+        </div>
+        <div *ngIf="school" class="flex align-items-center gap-2 border-1 surface-border p-2 px-3 border-round-xl bg-white shadow-1">
+            <i class="pi pi-building text-primary text-xl"></i>
+            <span class="font-bold text-700 text-sm">{{ school.nameSchool }}</span>
+        </div>
+    </div>
+
+    <!-- Loading spinner -->
+    <div *ngIf="loading" class="flex justify-content-center align-items-center py-8">
+        <i class="pi pi-spin pi-spinner text-4xl text-primary"></i>
+    </div>
+
+    <!-- Main Content -->
+    <div *ngIf="!loading">
+        <!-- Announcements Grid -->
+        <div *ngIf="announcementsList.length > 0; else emptyState">
+            <div class="grid">
+                <div *ngFor="let file of paginatedAnnouncements" class="col-12 md:col-6 lg:col-4 p-3">
+                    <p-card styleClass="shadow-2 hover:shadow-4 border-round-2xl border-1 surface-border transition-all duration-300 h-full flex flex-column">
+                        
+                        <div class="flex align-items-start gap-3 mb-3">
+                            <div class="p-3 border-round bg-gray-50 flex justify-content-center align-items-center">
+                                <i [ngClass]="getFileIcon(file.extension)"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-900 m-0 text-ellipsis whitespace-nowrap overflow-hidden" [title]="getCleanFileName(file.name)">
+                                    {{ getCleanFileName(file.name) }}
+                                </h4>
+                                <p class="text-500 text-xs mt-1 m-0">
+                                    Publicado: {{ file.createdAt | date:'dd/MM/yyyy' }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-content-end mt-auto pt-3 border-t-1 surface-border">
+                            <p-button 
+                                label="Ver Documento" 
+                                icon="pi pi-external-link" 
+                                [outlined]="true" 
+                                severity="info" 
+                                size="small" 
+                                (click)="previewAnnouncement(file)" />
+                        </div>
+                    </p-card>
+                </div>
+            </div>
+
+            <!-- Paginador de PrimeNG -->
+            <div class="flex justify-content-center mt-4">
+                <p-paginator 
+                    (onPageChange)="onPageChange($event)" 
+                    [first]="first" 
+                    [rows]="rows" 
+                    [totalRecords]="totalRecords" 
+                    [rowsPerPageOptions]="[6, 12, 24]"
+                    styleClass="border-round-2xl border-1 surface-border shadow-1 bg-white p-2">
+                </p-paginator>
+            </div>
+        </div>
+
+        <!-- Empty state template -->
+        <ng-template #emptyState>
+            <div class="flex flex-column align-items-center justify-content-center py-8 surface-card border-round-2xl border-1 surface-border shadow-1">
+                <i class="pi pi-bell-slash text-5xl text-300 mb-3"></i>
+                <h3 class="font-bold text-800 m-0">Sin comunicados</h3>
+                <p class="text-500 text-sm mt-1 mb-0">No se han publicado comunicados o documentos para su carrera en este momento.</p>
+            </div>
+        </ng-template>
+    </div>
+</div>

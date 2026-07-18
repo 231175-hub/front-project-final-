@@ -17,7 +17,6 @@ export function me(http: HttpClient, rootUrl: string, params?: Me$Params, contex
 'full_name'?: string;
 'role'?: string;
 'ïd_user'?: string;
-'url_image'?: string;
 }>> {
   const rb = new RequestBuilder(rootUrl, me.PATH, 'get');
   if (params) {

@@ -13,6 +13,7 @@ export interface Registeracademicperiod$Params {
 'endDate'?: string;
 'numberPeriod'?: number;
 'startDate'?: string;
+'status'?: string;
 'yearPeriod'?: number;
 }
 }

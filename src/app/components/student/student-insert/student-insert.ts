@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Api } from '../../../api/api';
 import { indexschool, registerstudent, Registerstudent$Params } from '../../../api/functions';
@@ -6,6 +6,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { SelectModule } from 'primeng/select';
 import { Button } from "primeng/button";
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { inject } from '@angular/core';
 
 interface School {
   nameSchool: string;
@@ -14,11 +17,15 @@ interface School {
 
 @Component({
   selector: 'app-student-insert',
-  imports: [ReactiveFormsModule, InputTextModule, FormsModule, PasswordModule, SelectModule, Button],
+  imports: [ReactiveFormsModule, InputTextModule, FormsModule, PasswordModule, SelectModule, Button, ToastModule],
+  providers: [MessageService],
   templateUrl: './student-insert.html',
   styleUrl: './student-insert.css',
 })
 export class StudentInsert implements OnInit{
+
+  private messageService = inject(MessageService);
+  public loading = signal<boolean>(false);
 
   frmInsertStudent: FormGroup;
 
@@ -29,7 +36,6 @@ export class StudentInsert implements OnInit{
   get emailfb() {return this.frmInsertStudent.controls['email']};
   get passwordfb() {return this.frmInsertStudent.controls['password']};
   get codefb() {return this.frmInsertStudent.controls['code']};
-  get currentSemesterfb() {return this.frmInsertStudent.controls['currentSemester']};
   get totalCreditsfb() {return this.frmInsertStudent.controls['totalCredits']};
   get idSchoolfb() {return this.frmInsertStudent.controls['idSchool']};
 
@@ -40,7 +46,6 @@ export class StudentInsert implements OnInit{
       'email': ['', [Validators.required]],
       'password': ['', [Validators.required]],
       'code': ['', [Validators.required]],
-      'currentSemester': ['', [Validators.required]],
       'totalCredits': ['', [Validators.required]],
       'idSchool': ['', [Validators.required]] 
     });
@@ -56,6 +61,19 @@ export class StudentInsert implements OnInit{
   }
 
   sendInsertStudent(event: Event) {
+    if (this.frmInsertStudent.invalid) {
+      this.frmInsertStudent.markAllAsTouched();
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Complete todos los campos obligatorios.',
+        life: 3000
+      });
+      return;
+    }
+
+    this.loading.set(true);
+
     const bodyParams: Registerstudent$Params = {
       body: {
         'firstName': this.firstNamefb.value,
@@ -63,15 +81,40 @@ export class StudentInsert implements OnInit{
         'email': this.emailfb.value,
         'password': this.passwordfb.value,
         'code': this.codefb.value,
-        'currentSemester': this.currentSemesterfb.value,
         'totalCredits': this.totalCreditsfb.value,
         'idSchool': this.idSchoolfb.value,
       }
     }
 
     this.api.invoke(registerstudent, bodyParams).then((response: any) => {
-      let apiResponse = response ? JSON.parse(response) : response;
-      this.frmInsertStudent.reset();
+      let apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
+      
+      if (apiResponse && apiResponse.type === 'error') {
+        const errorDetail = apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error de validación.';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: errorDetail,
+          life: 5000
+        });
+      } else {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Estudiante registrado correctamente.',
+          life: 3000
+        });
+        this.frmInsertStudent.reset();
+      }
+      this.loading.set(false);
+    }).catch((error) => {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Ups. Algo salió mal al registrar al estudiante: ' + error,
+        life: 5000
+      });
+      this.loading.set(false);
     });
   }
 }

@@ -1,134 +1,179 @@
-<div class="card flex justify-center pb-3">
-    <form [formGroup]="frmGroupAssignment">
-        <p-select [options]="listSchool" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" class="w-full md:w-56" />
-    </form>
-</div>
-
-<div class="grid grid-cols-1 gap-6">
-    <div class="flex flex-col gap-2">
-        
-        <div class="flex items-center gap-4 mb-2">
-            <p-button label="Registrar Curso" styleClass="bg-black hover:bg-gray-800 border-black text-white rounded-full px-4" (click)="addCourse()" />
-        </div>
-
-        <div class="border rounded-md overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead class="border-b bg-gray-50">
-                    <tr>
-                        <th class="p-3 text-sm font-bold text-gray-800 text-center">Descripción (Cursos)</th>
-                        <th class="p-3 text-sm font-bold text-gray-800 text-center w-32">ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for(course of coursesList; track course.id) {
-                        <tr class="border-b last:border-none">
-                            <td class="p-4 text-center">
-                                <p-autoComplete 
-                                    [(ngModel)]="course.courseObject"
-                                    [suggestions]="courseSuggestions" 
-                                    (completeMethod)="searchCourse($event, course)" 
-                                    optionLabel="nameCourse" 
-                                    dataKey="idCourse" 
-                                    [delay]="300" 
-                                    (onSelect)="loadGroupsForCourse(course)"
-                                    placeholder="Escribe el nombre del curso..."
-                                    [dropdown]="false"
-                                    styleClass="w-full">
-                                </p-autoComplete>                                
-                                
-                                <div class="border border-solid border-gray-300 p-4 rounded-md bg-gray-100 mt-4">
-                                    <div class="flex items-center gap-4 mb-2 justify-center">
-                                        <p-button label="Agregar Grupo y Docente" styleClass="bg-indigo-600 hover:bg-indigo-700 border-indigo-600 text-white rounded-full px-4 py-2 text-sm shadow-sm" (click)="addGroup(course)" />
-                                    </div>
-
-                                    @for(group of course.groups; track group.id) {
-                                        <div class="border border-solid border-gray-300 p-4 rounded-md bg-white mt-3 shadow-sm relative">
-                                            
-                                            <!-- CABECERA DEL GRUPO (Grupo + Profesor) -->
-                                            <div class="mb-4 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 bg-slate-50 p-3 rounded border">
-                                                <div class="flex-1 w-full flex flex-col md:flex-row gap-3">
-                                                    <!-- Selector de Grupo -->
-                                                    <div class="w-full md:w-1/3">
-                                                        <span class="text-xs font-bold text-gray-500 mb-1 block">SECCIÓN/GRUPO</span>
-                                                        <p-select [options]="getFilteredGroups(course, group)" [(ngModel)]="group.idGroupSelected" optionValue="idGroup" optionLabel="nameGroup" placeholder="Ej. Grupo A" class="w-full" /> 
-                                                    </div>
-
-                                                    <!-- Autocompletado del Profesor -->
-                                                    <div class="w-full md:w-2/3">
-                                                        <span class="text-xs font-bold text-gray-500 mb-1 block">DOCENTE ASIGNADO</span>
-                                                        <p-autoComplete 
-                                                            [(ngModel)]="group.professorObject"
-                                                            [suggestions]="professorSuggestions" 
-                                                            (completeMethod)="searchProfessorAutocomplete($event)" 
-                                                            optionLabel="fullName" 
-                                                            placeholder="Buscar por nombre o apellido..."
-                                                            [dropdown]="false"
-                                                            styleClass="w-full">
-                                                            <ng-template let-prof pTemplate="item">
-                                                                <div class="flex items-center gap-2">
-                                                                    <i class="pi pi-user text-indigo-500"></i>
-                                                                    <span class="font-medium text-gray-700">{{ prof.fullName }}</span>
-                                                                </div>
-                                                            </ng-template>
-                                                        </p-autoComplete>
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Botón Eliminar Grupo -->
-                                                <p-button icon="pi pi-trash" severity="danger" styleClass="bg-red-500 hover:bg-red-600 rounded-full w-10 h-10 p-0 shrink-0 shadow-sm mt-4 xl:mt-0" (click)="removeGroup(course, group)" />
-                                            </div>
-
-                                            <div class="flex items-center gap-4 mb-3 justify-center">
-                                                <p-button label="Añadir Bloque de Horario" icon="pi pi-clock" styleClass="bg-gray-700 hover:bg-gray-900 border-gray-700 text-white rounded-full px-4 py-2 text-xs" (click)="addSchedule(group)" />
-                                            </div>
-
-                                            <table class="w-full text-left border-collapse bg-white border rounded">
-                                                <thead class="border-b bg-gray-100">
-                                                    <tr>
-                                                        <th class="p-2 text-xs font-bold text-gray-600 text-center">Día</th>
-                                                        <th class="p-2 text-xs font-bold text-gray-600 text-center">Inicio</th>
-                                                        <th class="p-2 text-xs font-bold text-gray-600 text-center">Fin</th>
-                                                        <th class="p-2 text-xs font-bold text-gray-600 text-center">Aula/Ambiente</th>
-                                                        <th class="p-2 text-xs font-bold text-gray-600 text-center w-24">Acción</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @for(schedule of group.schedules; track schedule.id) {
-                                                        <tr class="border-b last:border-none hover:bg-gray-50">
-                                                            <td class="p-2 text-center">
-                                                                <p-select [options]="days" [(ngModel)]="schedule.dayWeek" optionValue="name" optionLabel="name" placeholder="Día" class="w-full min-w-120px" />
-                                                            </td>
-                                                            <td class="p-2 text-center">
-                                                                <input type="time" pInputText [(ngModel)]="schedule.startTime" class="w-full" />
-                                                            </td>
-                                                            <td class="p-2 text-center">
-                                                                <input type="time" pInputText [(ngModel)]="schedule.endTime" class="w-full" />
-                                                            </td>
-                                                            <td class="p-2 text-center">
-                                                                <input type="text" pInputText [(ngModel)]="schedule.classroom" placeholder="Ej. Aula 302" class="w-full" />
-                                                            </td>
-                                                            <td class="p-2 text-center align-middle">
-                                                                <p-button icon="pi pi-times" severity="danger" styleClass="bg-orange-500 hover:bg-orange-600 border-orange-600 text-white rounded-full w-8 h-8 p-0" (click)="removeSchedule(group, schedule)" />
-                                                            </td>
-                                                        </tr>
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    }
-                                </div>
-                            </td>
-                            <td class="p-2 text-center align-top pt-4">
-                                <p-button label="Quitar Curso" icon="pi pi-minus-circle" severity="danger" styleClass="bg-red-500 hover:bg-red-600 border-red-600 text-white rounded-full text-sm px-4 py-2" (click)="removeCourse(course)" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+<div class="flex justify-content-center my-6 px-3">
+  <div class="surface-card border-1 surface-border shadow-2 border-round-2xl overflow-hidden w-full" style="max-width: 900px;">
+    <!-- Header Banner -->
+    <div class="px-5 py-4 text-white flex justify-content-between align-items-center border-bottom-1 surface-border" style="background: linear-gradient(135deg, #1e3a8a, #0f172a);">
+      <div>
+        <h2 class="text-xl font-bold text-white m-0">Registrar Horarios</h2>
+        <p class="text-xs text-blue-100 mt-1 m-0">Asigne docentes, secciones y bloques horarios a los cursos de la escuela seleccionada.</p>
+      </div>
+      <i class="pi pi-clock text-2xl text-blue-200"></i>
     </div>
-</div>
 
-<div class="flex justify-end border-t pt-4 mt-4">
-    <p-button label="Guardar Asignaciones" icon="pi pi-save" (click)="sendInsertSchedule($event)" severity="info" styleClass="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-6 py-3 font-bold text-lg shadow-md transition-all" />
+    <div class="p-5 flex flex-column gap-4">
+      
+      <!-- Escuela Form -->
+      <form [formGroup]="frmGroupAssignment" class="grid">
+        <div class="col-12 flex flex-column gap-2">
+          <label for="escuela" class="text-sm font-semibold text-700">
+            Escuela <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-select [options]="listSchool" id="escuela" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" appendTo="body" class="w-full" styleClass="w-full" />
+          @if ((idSchoolfb.touched || idSchoolfb.dirty) && idSchoolfb.errors && idSchoolfb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
+      </form>
+
+      <!-- Registrar Curso Button -->
+      <div class="flex items-center gap-3">
+        <p-button label="Registrar Curso" icon="pi pi-plus" styleClass="p-button-outlined p-button-sm" [disabled]="frmGroupAssignment.invalid" (click)="addCourse()" />
+        @if (coursesList.length === 0) {
+          <span class="text-orange-500 font-semibold text-sm">Agregue cursos para empezar a definir sus horarios.</span>
+        }
+      </div>
+
+      <!-- Courses List -->
+      @if (coursesList.length > 0) {
+        <div class="flex flex-column gap-4">
+          @for(course of coursesList; track course.id) {
+            <div class="border-1 surface-border border-round-xl p-4 bg-light relative flex flex-column gap-3 shadow-1">
+              
+              <!-- Cabecera del Curso (Autocomplete + Quitar) -->
+              <div class="grid align-items-center">
+                <div class="col-12 md:col-9 flex flex-column gap-1.5">
+                  <label class="text-xs font-bold text-gray-500">CURSO <span class="text-red-500">*</span></label>
+                  <p-autoComplete 
+                      [(ngModel)]="course.courseObject"
+                      [suggestions]="courseSuggestions" 
+                      (completeMethod)="searchCourse($event, course)" 
+                      optionLabel="nameCourse" 
+                      dataKey="idCourse" 
+                      [delay]="300" 
+                      (onSelect)="loadGroupsForCourse(course)"
+                      placeholder="Escribe el nombre del curso..."
+                      [dropdown]="false"
+                      styleClass="w-full"
+                      class="w-full">
+                  </p-autoComplete>
+                </div>
+                <div class="col-12 md:col-3 flex justify-content-end md:justify-content-center pt-3 md:pt-0">
+                  <p-button label="Quitar Curso" icon="pi pi-trash" severity="danger" [outlined]="true" size="small" (click)="removeCourse(course)" />
+                </div>
+              </div>
+
+              <!-- Grupos del Curso -->
+              @if (course.courseObject) {
+                <div class="border-1 surface-border p-3 border-round-lg bg-white flex flex-column gap-3">
+                  <div class="flex justify-content-center">
+                    <p-button label="Agregar Grupo y Docente" icon="pi pi-plus-circle" styleClass="p-button-sm p-button-secondary" (click)="addGroup(course)" />
+                  </div>
+
+                  @for(group of course.groups; track group.id) {
+                    <div class="border-1 surface-border p-3 border-round-lg bg-light flex flex-column gap-3 relative shadow-1">
+                      
+                      <!-- Fila Grupo y Docente -->
+                      <div class="grid align-items-center">
+                        <div class="col-12 md:col-4 flex flex-column gap-1.5">
+                          <label class="text-xs font-bold text-gray-500">GRUPO / SECCIÓN <span class="text-red-500">*</span></label>
+                          <p-select [options]="getFilteredGroups(course, group)" [(ngModel)]="group.idGroupSelected" optionValue="idGroup" optionLabel="nameGroup" placeholder="Seleccione grupo" appendTo="body" class="w-full" styleClass="w-full" />
+                        </div>
+                        <div class="col-12 md:col-6 flex flex-column gap-1.5">
+                          <label class="text-xs font-bold text-gray-500">DOCENTE ASIGNADO</label>
+                          <p-autoComplete 
+                              [(ngModel)]="group.professorObject"
+                              [suggestions]="professorSuggestions" 
+                              (completeMethod)="searchProfessorAutocomplete($event)" 
+                              optionLabel="fullName" 
+                              placeholder="Buscar por nombre..."
+                              [dropdown]="false"
+                              styleClass="w-full"
+                              class="w-full">
+                              <ng-template let-prof pTemplate="item">
+                                  <div class="flex items-center gap-2">
+                                      <i class="pi pi-user text-indigo-500"></i>
+                                      <span class="font-medium text-gray-700">{{ prof.fullName }}</span>
+                                  </div>
+                              </ng-template>
+                          </p-autoComplete>
+                        </div>
+                        <div class="col-12 md:col-2 flex justify-content-end pt-3 md:pt-0">
+                          <p-button icon="pi pi-times" severity="danger" [outlined]="true" size="small" (click)="removeGroup(course, group)" />
+                        </div>
+                      </div>
+
+                      <!-- Horarios del Grupo -->
+                      @if (group.idGroupSelected) {
+                        <div class="flex flex-column gap-2 mt-2">
+                          <div class="flex justify-content-center">
+                            <p-button label="Añadir Bloque de Horario" icon="pi pi-clock" styleClass="p-button-outlined p-button-sm text-xs" (click)="addSchedule(group)" />
+                          </div>
+
+                          @if (group.schedules && group.schedules.length > 0) {
+                            <div class="border-1 surface-border border-round-lg overflow-hidden bg-white">
+                              <table class="w-full text-left border-collapse" style="width: 100%;">
+                                  <thead class="bg-light border-bottom surface-border">
+                                      <tr>
+                                          <th class="p-2 text-xs font-bold text-600 text-center" style="width: 25%;">Día</th>
+                                          <th class="p-2 text-xs font-bold text-600 text-center" style="width: 20%;">Inicio</th>
+                                          <th class="p-2 text-xs font-bold text-600 text-center" style="width: 20%;">Fin</th>
+                                          <th class="p-2 text-xs font-bold text-600 text-center" style="width: 25%;">Aula/Ambiente</th>
+                                          <th class="p-2 text-xs font-bold text-600 text-center" style="width: 10%;">Acción</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody>
+                                      @for(schedule of group.schedules; track schedule.id) {
+                                          <tr class="border-bottom last:border-none surface-border">
+                                              <td class="p-2">
+                                                  <p-select [options]="days" [(ngModel)]="schedule.dayWeek" optionValue="name" optionLabel="name" placeholder="Día" appendTo="body" class="w-full" styleClass="w-full" />
+                                              </td>
+                                              <td class="p-2">
+                                                  <input type="time" pInputText [(ngModel)]="schedule.startTime" class="w-full text-center" />
+                                              </td>
+                                              <td class="p-2">
+                                                  <input type="time" pInputText [(ngModel)]="schedule.endTime" class="w-full text-center" />
+                                              </td>
+                                              <td class="p-2">
+                                                  <input type="text" pInputText [(ngModel)]="schedule.classroom" placeholder="Aula 102" class="w-full text-center" />
+                                              </td>
+                                              <td class="p-2 text-center align-middle">
+                                                  <p-button icon="pi pi-times" severity="danger" [outlined]="true" size="small" (click)="removeSchedule(group, schedule)" />
+                                              </td>
+                                          </tr>
+                                      }
+                                  </tbody>
+                              </table>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                    </div>
+                  }
+                </div>
+              }
+
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Footer Buttons and Dialogs -->
+      <div class="flex justify-content-end pt-4 border-top-1 surface-border align-items-center gap-3">
+        <p-toast />
+        <p-confirmdialog>
+            <ng-template #message let-message>
+                @if (message) {
+                    <div class="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border p-4">
+                        <i [ngClass]="message.icon" class="text-5xl text-primary"></i>
+                        <p class="text-base text-700 m-0">{{ message.message }}</p>
+                    </div>
+                }
+            </ng-template>
+        </p-confirmdialog>
+        
+        <p-button (click)="sendInsertSchedule($event)" icon="pi pi-save" label="Guardar Asignaciones" [disabled]="coursesList.length === 0 || frmGroupAssignment.invalid" styleClass="px-4 border-round-lg" />
+      </div>
+
+    </div>
+  </div>
 </div>

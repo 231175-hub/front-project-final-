@@ -73,14 +73,10 @@ export class StudentIndex implements OnInit{
   }
 
   getSeverity(status: string) {
-    switch (status) {
-      case 'INSTOCK':
-        return 'success';
-      case 'LOWSTOCK':
-        return 'warn';
-      case 'OUTOFSTOCK':
-        return 'danger';
-      default: return 'info';
-    }
+    if (!status) return 'info';
+    const s = status.toLowerCase();
+    if (s === 'activo') return 'success';
+    if (s === 'inactivo') return 'danger';
+    return 'info';
   }
 }

@@ -1,41 +1,145 @@
-<div class="layout-container min-h-screen surface-ground flex flex-column">
-    
-    <header class="shadow-2 z-2 sticky top-0">
-        <p-megamenu [model]="itemsMega" id="megamenu" [style]="{ display: 'flex', 'border-radius': '0', 'border': 'none' }" class="p-3 surface-0">
-            <ng-template #start>
-                <img src="/unamba-logo.png" alt="unamba-logo" id="unamba-logo" class="h-3rem mr-4">
-            </ng-template>
-            
-            <ng-template #item let-item>
-                <a *ngIf="item.root" class="flex align-items-center cursor-pointer px-4 py-2 font-bold text-xl text-primary" style="background: transparent !important; text-decoration: none;">
-                    <i [ngClass]="item.icon"></i>
-                    <span class="ml-2">{{ item.label }}</span>
-                </a>
-            </ng-template>
-    
-            <ng-template #end>
-                <div class="flex align-items-center gap-3">
-                    <span class="font-medium text-sm hidden md:inline text-700">Hola, {{ usernameLogueado }}</span>
-                    
-                    <img [src]="profilePicUrl" (click)="goToProfile()" alt="Foto de perfil" class="w-2rem h-2rem border-circle object-cover shadow-1 cursor-pointer hover:shadow-2 transition-duration-200" title="Ver Mi Perfil" />
+<div class="layout-wrapper flex min-h-screen">
 
-                    <button pButton pRipple type="button" icon="pi pi-sign-out" label="Salir" class="p-button-text p-button-danger p-button-sm ml-2" (click)="logout()"></button>
+    <!-- Mobile Sidebar Menu Overlay -->
+    <div *ngIf="mobileMenuVisible()" class="mobile-sidebar-overlay lg:hidden" (click)="toggleMobileMenu()"></div>
+    <aside class="mobile-sidebar lg:hidden flex flex-column justify-content-between" [class.active]="mobileMenuVisible()">
+        <div>
+            <div [routerLink]="['/']" (click)="toggleMobileMenu()"
+                class="logo-area flex align-items-center gap-3 p-4 cursor-pointer border-bottom-1 border-slate-800">
+                <div class="sidebar-icon-box flex align-items-center justify-content-center border-round shadow-1">
+                    <i [class]="getRoleIcon()" class="text-white text-2xl"></i>
                 </div>
-            </ng-template>
-        </p-megamenu>
-    </header>
-
-    <div class="flex flex-grow-1 flex-row p-4 gap-4 align-items-start w-full max-w-screen-2xl mx-auto">
-        
-        <aside class="w-20rem flex-shrink-0 sticky top-5rem z-1 hidden lg:block">
-            <div class="surface-card shadow-1 border-round-xl p-2">
-                <p-panelmenu [model]="itemsMenu" id="panelmenu" [multiple]="false">
-                    </p-panelmenu>
+                <div class="logo-text">
+                    <span class="block font-bold text-white text-lg">UNAMBA</span>
+                    <span class="block text-xs text-slate-300 font-semibold tracking-wider uppercase">
+                        {{ getRoleSubtitle() }}
+                    </span>
+                </div>
             </div>
-        </aside>
-    
-        <main class="flex-1 min-w-0 surface-card border-round-xl p-5 shadow-1">
+            <div class="p-3">
+                <p-panelmenu [model]="itemsMenu" id="panelmenu" [multiple]="false" styleClass="dark-panelmenu">
+                </p-panelmenu>
+            </div>
+        </div>
+        <div class="p-4 border-top-1 border-slate-800">
+            <button pButton pRipple type="button" icon="pi pi-question-circle" label="Soporte"
+                class="p-button-text text-slate-300 hover:text-white p-button-sm w-full justify-content-start">
+            </button>
+        </div>
+    </aside>
+
+    <aside class="sidebar-container flex-shrink-0 hidden lg:flex flex-column justify-content-between" [class.collapsed]="sidebarCollapsed()">
+        <div>
+            <div [routerLink]="['/']"
+                class="logo-area flex align-items-center gap-3 p-4 cursor-pointer border-bottom-1 border-slate-800">
+                <div class="sidebar-icon-box flex align-items-center justify-content-center border-round shadow-1">
+                    <i [class]="getRoleIcon()" class="text-white text-2xl"></i>
+                </div>
+                <div class="logo-text">
+                    <span class="block font-bold text-white text-lg">UNAMBA</span>
+                    <span class="block text-xs text-slate-300 font-semibold tracking-wider uppercase">
+                        {{ getRoleSubtitle() }}
+                    </span>
+                </div>
+            </div>
+
+            
+            <div class="p-3">
+                <p-panelmenu [model]="itemsMenu" id="panelmenu" [multiple]="false" styleClass="dark-panelmenu">
+                </p-panelmenu>
+            </div>
+        </div>
+
+        <div class="p-4 border-top-1 border-slate-800">
+            <button pButton pRipple type="button" icon="pi pi-question-circle" label="Soporte"
+                class="p-button-text text-slate-300 hover:text-white p-button-sm w-full justify-content-start">
+            </button>
+        </div>
+    </aside>
+
+    <div class="main-container flex-grow-1 flex flex-column">
+
+        <header class="topbar flex align-items-center justify-content-between px-4 py-3 bg-white shadow-1">
+            <div class="flex align-items-center gap-2">
+                <button pButton pRipple type="button" icon="pi pi-bars"
+                    class="p-button-text p-button-secondary lg:hidden" (click)="toggleMobileMenu()"></button>
+                <button pButton pRipple type="button" icon="pi pi-bars"
+                    class="p-button-text p-button-secondary hidden lg:inline-flex" 
+                    (click)="toggleSidebar()" 
+                    [title]="sidebarCollapsed() ? 'Expandir menú' : 'Contraer menú'"></button>
+                <button pButton pRipple type="button" icon="pi pi-home" [routerLink]="['/']"
+                    class="p-button-text p-button-secondary" title="Ir al Inicio"></button>
+                <img src="/unamba-logo.png" alt="UNAMBA Logo" class="h-3rem ml-2 cursor-pointer" [routerLink]="['/']"
+                    title="Ir al Inicio" style="max-height: 40px; width: auto;" />
+                <span class="font-bold text-slate-800 text-lg hidden sm:inline ml-2">Sistema Académico</span>
+            </div>
+
+            <div class="flex align-items-center gap-3">
+                <div class="text-right hidden md:block">
+                    <span class="block font-semibold text-slate-700 text-sm">Hola, {{ loggedInUsername() }}</span>
+                    <span class="block text-xs text-slate-400 capitalize">
+                        {{ isAdmin() ? 'Administrador' : (isProfessor() ? 'Docente' : 'Estudiante') }}
+                    </span>
+                </div>
+
+                <img [src]="profilePicUrl()" (click)="goToProfile()" alt="Foto de perfil"
+                    class="w-3rem h-3rem border-circle object-cover shadow-1 cursor-pointer hover:shadow-2 transition-duration-200 border-2 border-primary"
+                    title="Ver Mi Perfil" />
+
+                
+                <button pButton pRipple type="button" 
+                    [icon]="isDarkMode() ? 'pi pi-sun' : 'pi pi-moon'" 
+                    class="p-button-rounded p-button-text p-button-secondary" 
+                    (click)="toggleDarkMode()" 
+                    [title]="isDarkMode() ? 'Activar Modo Claro' : 'Activar Modo Oscuro'">
+                </button>
+
+                <button pButton pRipple type="button" icon="pi pi-sign-out" label="Salir"
+                    class="p-button-text p-button-danger p-button-sm ml-2 btn-logout-resp" (click)="logout()">
+                </button>
+            </div>
+        </header>
+
+        <main class="content-wrapper flex-grow-1 p-4 surface-ground">
+
+            <div *ngIf="isDashboardHome()" class="welcome-banner p-5 text-white border-round-xl shadow-2 mb-4">
+                <div
+                    class="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center gap-3">
+                    <div>
+                        <h1 class="m-0 font-bold text-3xl">Buenos días, {{ loggedInUsername() }}</h1>
+                        <p class="mt-2 mb-0 opacity-95 text-base">
+                            {{ isProfessor() ? 'Estimado docente, no olvide guardar los cambios después de realizar el registro de calificaciones de sus grupos.' : (isStudent() ? 'Bienvenido de nuevo.' : 'Bienvenido al panel de administración.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <app-interactive-slider *ngIf="isDashboardHome()"></app-interactive-slider>
+
             <router-outlet></router-outlet>
         </main>
+
+        <footer class="app-footer relative overflow-hidden" [class.home-footer]="isDashboardHome()" [class.mt-auto]="!isDashboardHome()">
+            <div class="footer-waves">
+                <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"
+                    style="width: 100%; height: 200px; display: block;">
+                    <path d="M0,80 C320,120 640,40 960,80 C1120,95 1280,110 1440,90 L1440,120 L0,120 Z"
+                        fill="#e53935" />
+                    <path d="M0,60 C480,130 800,20 1440,70 L1440,120 L0,120 Z" fill="#c29b57" />
+                    <path d="M0,90 C360,60 720,110 1080,75 C1260,60 1380,85 1440,95 L1440,120 L0,120 Z"
+                        fill="#122b54" />
+                </svg>
+            </div>
+
+            <div
+                class="footer-content py-4 px-5 text-white flex flex-column md:flex-row justify-content-between align-items-center gap-3">
+                <span class="text-lg font-bold opacity-95">
+                    Universidad Nacional Micaela Bastidas de Apurímac
+                </span>
+                <span class="text-base font-semibold opacity-90">
+                    &copy; 2026 UNAMBA - Gestión Académica | Creado por Maykol D. Espinoza Kquerare
+                </span>
+            </div>
+        </footer>
     </div>
 </div>

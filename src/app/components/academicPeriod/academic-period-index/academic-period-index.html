@@ -1,33 +1,192 @@
-<div class="flex w-8 justify-content-end">
-    <p-table [columns]="cols" [value]="academicPeriodList" [tableStyle]="{ 'min-width': '50rem' }">
-        
-        <ng-template #header let-columns>
-            <tr>
-                @for (col of columns; track col) {
-                    <th>
-                        {{ col.header }}
-                    </th>
-                }
-            </tr>
-        </ng-template>
+<p-toast></p-toast>
 
-        <ng-template #body let-rowData let-columns="columns">
-            <tr>
-                @for (col of columns; track col) {
-                    <td>
-                        @if (col.field === 'status') {
-                            <p-tag [value]="rowData[col.field]" [severity]="getSeverity(rowData[col.field])" />
-                        } @else if(col.field === 'update') {
-                            <p-button (click)="updateAcademicPeriod( $event, rowData.idPeriod )">Actualizar Periodo Academico</p-button>
-                        }@else if (col.field === 'delete'){
-                            <p-button (click)="deleteAcademicPeriod($event, rowData.idPeriod)">Eliminar</p-button>
-                        }@else {
-                            {{ rowData[col.field] }}
-                        }
+<div class="w-full flex flex-column gap-4 p-2">
+    <!-- Header Banner -->
+    <div class="px-5 py-4 text-white flex justify-content-between align-items-center border-round-2xl shadow-1" style="background: linear-gradient(135deg, #1e3a8a, #0f172a);">
+        <div class="flex align-items-center gap-3">
+            <i class="pi pi-calendar text-3xl text-white"></i>
+            <div>
+                <h2 class="text-xl font-bold text-white m-0">Periodos Académicos</h2>
+                <p class="text-xs text-blue-100 mt-1 m-0">Consulte, registre y administre los periodos lectivos y semestres del sistema.</p>
+            </div>
+        </div>
+        <p-button 
+            (click)="openRegisterModal()" 
+            icon="pi pi-plus" 
+            label="Crear Periodo Académico" 
+            styleClass="p-button-rounded p-button-sm bg-white text-blue-900 border-none font-bold shadow-2 hover:shadow-4" />
+    </div>
+
+    <!-- Table -->
+    <div class="surface-card border-1 surface-border shadow-1 border-round-2xl overflow-hidden p-3 w-full">
+        <p-table 
+            [columns]="cols" 
+            [value]="academicPeriodList" 
+            [paginator]="true" 
+            [rows]="10" 
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [tableStyle]="{ 'min-width': '100%' }"
+            styleClass="p-datatable-striped">
+            
+            <ng-template #header let-columns>
+                <tr>
+                    @for (col of columns; track col) {
+                        <th class="font-bold text-sm">
+                            {{ col.header }}
+                        </th>
+                    }
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-rowData let-columns="columns">
+                <tr>
+                    @for (col of columns; track col) {
+                        <td>
+                            @if (col.field === 'status') {
+                                <p-tag [value]="rowData[col.field]" [severity]="getSeverity(rowData[col.field])" styleClass="text-xs font-semibold px-2 py-1" />
+                            } @else if (col.field === 'actions') {
+                                <div class="flex gap-2">
+                                    <p-button 
+                                        icon="pi pi-pencil" 
+                                        label="Editar" 
+                                        [outlined]="true" 
+                                        severity="info" 
+                                        size="small" 
+                                        (click)="openEditModal(rowData)" />
+                                    <p-button 
+                                        icon="pi pi-trash" 
+                                        label="Eliminar" 
+                                        [outlined]="true" 
+                                        severity="danger" 
+                                        size="small" 
+                                        (click)="deleteAcademicPeriod($event, rowData.idPeriod)" />
+                                </div>
+                            } @else {
+                                {{ rowData[col.field] }}
+                            }
+                        </td>
+                    }
+                </tr>
+            </ng-template>
+
+            <ng-template #emptymessage>
+                <tr>
+                    <td [attr.colspan]="cols.length" class="text-center py-5">
+                        <div class="flex flex-column align-items-center gap-2 text-500">
+                            <i class="pi pi-calendar-plus text-3xl"></i>
+                            <span class="text-sm">No hay periodos académicos registrados.</span>
+                        </div>
                     </td>
-                }
-            </tr>
-        </ng-template>
-        
-    </p-table>
+                </tr>
+            </ng-template>
+            
+        </p-table>
+    </div>
 </div>
+
+<p-confirmdialog>
+    <ng-template #message let-message>
+        @if (message) {
+            <div class="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border p-4">
+                <i [ngClass]="message.icon" class="text-5xl text-primary"></i>
+                <p class="text-base text-700 m-0">{{ message.message }}</p>
+            </div>
+        }
+    </ng-template>
+</p-confirmdialog>
+
+<!-- Register/Edit Academic Period Dialog -->
+<p-dialog 
+    [(visible)]="displayRegisterModal" 
+    [header]="isEditing ? 'Editar Periodo Académico' : 'Registrar Nuevo Periodo Académico'" 
+    [modal]="true" 
+    [style]="{ width: '400px' }" 
+    [draggable]="false" 
+    [resizable]="false"
+    styleClass="border-round-2xl shadow-4">
+
+    <form [formGroup]="frmAcademicPeriod" class="flex flex-column gap-4 pt-3">
+        
+        <!-- Año -->
+        <div class="flex flex-column gap-2">
+            <label for="yearPeriod" class="font-semibold text-800 text-sm">Año <span class="text-red-500">*</span></label>
+            <input type="text" id="yearPeriod" pInputText formControlName="yearPeriod" placeholder="Ej. 2026" class="w-full" />
+            @if ((yearPeriodfb.touched || yearPeriodfb.dirty) && yearPeriodfb.errors) {
+                @if (yearPeriodfb.hasError('required')) {
+                    <small class="text-red-500 text-xs">Campo requerido.</small>
+                } @else if (yearPeriodfb.hasError('pattern')) {
+                    <small class="text-red-500 text-xs">Debe ingresar un año válido de 4 dígitos.</small>
+                }
+            }
+        </div>
+
+        <!-- Periodo -->
+        <div class="flex flex-column gap-2">
+            <label for="numberPeriod" class="font-semibold text-800 text-sm">Periodo <span class="text-red-500">*</span></label>
+            <p-select 
+                [options]="listPeriods" 
+                formControlName="numberPeriod" 
+                optionLabel="label" 
+                optionValue="value" 
+                placeholder="Seleccione Periodo" 
+                styleClass="w-full" />
+            @if ((numberPeriodfb.touched || numberPeriodfb.dirty) && numberPeriodfb.errors && numberPeriodfb.hasError('required')) {
+                <small class="text-red-500 text-xs">Campo requerido.</small>
+            }
+        </div>
+
+        <!-- Fecha de Inicio -->
+        <div class="flex flex-column gap-2">
+            <label for="startDate" class="font-semibold text-800 text-sm">Fecha de Inicio <span class="text-red-500">*</span></label>
+            <p-datepicker 
+                formControlName="startDate" 
+                dateFormat="dd/mm/yy" 
+                [showIcon]="true" 
+                placeholder="Seleccione Fecha" 
+                styleClass="w-full" />
+            @if ((startDatefb.touched || startDatefb.dirty) && startDatefb.errors && startDatefb.hasError('required')) {
+                <small class="text-red-500 text-xs">Campo requerido.</small>
+            }
+        </div>
+
+        <!-- Fecha de Fin -->
+        <div class="flex flex-column gap-2">
+            <label for="endDate" class="font-semibold text-800 text-sm">Fecha de Fin <span class="text-red-500">*</span></label>
+            <p-datepicker 
+                formControlName="endDate" 
+                dateFormat="dd/mm/yy" 
+                [showIcon]="true" 
+                placeholder="Seleccione Fecha" 
+                styleClass="w-full" />
+            @if ((endDatefb.touched || endDatefb.dirty) && endDatefb.errors && endDatefb.hasError('required')) {
+                <small class="text-red-500 text-xs">Campo requerido.</small>
+            }
+        </div>
+
+        <!-- Estado -->
+        <div class="flex flex-column gap-2">
+            <label for="status" class="font-semibold text-800 text-sm">Estado <span class="text-red-500">*</span></label>
+            <p-select 
+                [options]="listStatus" 
+                formControlName="status" 
+                placeholder="Seleccione Estado" 
+                styleClass="w-full" />
+            @if ((statusfb.touched || statusfb.dirty) && statusfb.errors && statusfb.hasError('required')) {
+                <small class="text-red-500 text-xs">Campo requerido.</small>
+            }
+        </div>
+
+    </form>
+
+    <ng-template #footer>
+        <div class="flex justify-content-end gap-2 border-top-1 surface-border pt-3">
+            <p-button label="Cancelar" icon="pi pi-times" [outlined]="true" severity="secondary" (click)="closeRegisterModal()" />
+            <p-button 
+                [label]="isEditing ? 'Guardar Cambios' : 'Registrar'" 
+                [icon]="isEditing ? 'pi pi-check' : 'pi pi-plus'" 
+                [loading]="loading" 
+                (click)="saveAcademicPeriod($event)" 
+                styleClass="border-round-lg" />
+        </div>
+    </ng-template>
+</p-dialog>

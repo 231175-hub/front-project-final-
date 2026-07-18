@@ -4,4 +4,5 @@ export const enviroments = {
     URL_NORMAL: 'http://localhost:8081/',
     URL_KEYCLOAK: 'http://localhost:8080'
 }
-    
+
+

@@ -1,41 +1,96 @@
-<form id="form" [formGroup]="frmUpdateAcademicPeriod"  class="card flex flex-wrap justify-center items-end gap-4">
-    <div>
-        <label for="anio">Año</label>
-        <input pInputText id="anio" formControlName="yearPeriod" autocomplete="off" /> 
+<div class="max-w-3xl mx-auto my-6">
+  <div class="bg-white border border-surface-200 shadow-md rounded-2xl overflow-hidden">
+    <!-- Header Banner -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-900 px-6 py-4 text-white flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-bold text-white">Actualizar Periodo Académico</h2>
+        <p class="text-xs text-blue-100 mt-1">Modifique los datos o estado del periodo académico vigente.</p>
+      </div>
+      <i class="pi pi-calendar text-2xl text-blue-200"></i>
     </div>
 
-    <div>
-        <label for="period">Periodo</label>
-        <input pInputText id="period" formControlName="numberPeriod" autocomplete="off" />
-    </div>
+    <form [formGroup]="frmUpdateAcademicPeriod" class="p-6 flex flex-col gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        
+        <!-- Año -->
+        <div class="flex flex-col gap-1.5">
+          <label for="anio" class="text-sm font-semibold text-gray-700">
+            Año <span class="text-red-500 font-bold">*</span>
+          </label>
+          <input pInputText id="anio" formControlName="yearPeriod" autocomplete="off" placeholder="Ej. 2026" maxlength="4" class="w-full" />
+          @if ((yearPeriodfb.touched || yearPeriodfb.dirty) && yearPeriodfb.errors) {
+            @if (yearPeriodfb.hasError('required')) {
+              <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+            }
+            @if (yearPeriodfb.hasError('pattern')) {
+              <small class="text-red-500 text-xs font-medium">El año debe ser un número de 4 dígitos.</small>
+            }
+          }
+        </div>
 
-    <div class="card flex justify-center gap-4 flex-wrap">
-        <label for="startDate">Fecha de inicio del Periodo</label>
-        <p-datepicker id="startDate" formControlName="startDate" [showButtonBar]="true" placeholder="Fecha de inicio" />
-    </div>
+        <!-- Periodo -->
+        <div class="flex flex-col gap-1.5">
+          <label for="period" class="text-sm font-semibold text-gray-700">
+            Periodo <span class="text-red-500 font-bold">*</span>
+          </label>
+          <input pInputText id="period" formControlName="numberPeriod" autocomplete="off" placeholder="Ej. II" class="w-full" />
+          @if ((numberPeriodfb.touched || numberPeriodfb.dirty) && numberPeriodfb.errors && numberPeriodfb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
 
-    <div class="card flex justify-center gap-4 flex-wrap">
-        <label for="endDate">Fecha de fin del Periodo</label>
-        <p-datepicker id="endDate" formControlName="endDate" [showButtonBar]="true" placeholder="Fecha de Culminación" />
-    </div>
+        <!-- Fecha de Inicio -->
+        <div class="flex flex-col gap-1.5">
+          <label for="startDate" class="text-sm font-semibold text-gray-700">
+            Fecha de Inicio del Periodo <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-datepicker id="startDate" formControlName="startDate" [showButtonBar]="true" placeholder="Fecha de inicio" styleClass="w-full" class="w-full" />
+          @if ((startDatefb.touched || startDatefb.dirty) && startDatefb.errors && startDatefb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
 
-    <div class="card flex justify-center">
-        <label for="status">Actualizar Estado</label>
-        <p-select [options]="statuses" id="status" formControlName="status" optionValue="status" optionLabel="status" placeholder="Estados" class="w-full md:w-56" />
-    </div>
+        <!-- Fecha de Fin -->
+        <div class="flex flex-col gap-1.5">
+          <label for="endDate" class="text-sm font-semibold text-gray-700">
+            Fecha de Fin del Periodo <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-datepicker id="endDate" formControlName="endDate" [showButtonBar]="true" placeholder="Fecha de Culminación" styleClass="w-full" class="w-full" />
+          @if ((endDatefb.touched || endDatefb.dirty) && endDatefb.errors && endDatefb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
 
-    <div class="card flex justify-center pt-2">
+        <!-- Estado -->
+        <div class="flex flex-col gap-1.5 md:col-span-2">
+          <label for="status" class="text-sm font-semibold text-gray-700">
+            Estado del Periodo <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-select [options]="statuses" id="status" formControlName="status" optionValue="status" optionLabel="status" placeholder="Estados" class="w-full" styleClass="w-full" />
+          @if ((statusfb.touched || statusfb.dirty) && statusfb.errors && statusfb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
+
+      </div>
+
+      <!-- Footer Buttons and Dialogs -->
+      <div class="flex justify-end pt-4 border-t border-gray-100 items-center gap-4">
         <p-toast />
         <p-confirmdialog>
             <ng-template #message let-message>
                 @if (message) {
-                    <div class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700">
+                    <div class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700 p-4">
                         <i [ngClass]="message.icon" class="text-6xl text-primary-500"></i>
-                        <p>{{ message.message }}</p>
+                        <p class="text-base text-gray-700">{{ message.message }}</p>
                     </div>
                 }
             </ng-template>
         </p-confirmdialog>
-        <p-button (click)="sendInsertAcademicPeriod($event)" label="Save" />
-    </div>
-</form>
+        
+        <button pButton pRipple (click)="sendInsertAcademicPeriod($event)" icon="pi pi-save" label="Actualizar Periodo" class="p-button-primary px-6 rounded-lg"></button>
+      </div>
+
+    </form>
+  </div>
+</div>

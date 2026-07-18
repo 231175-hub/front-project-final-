@@ -6,3 +6,288 @@
   --color-unamba-blue: #002D62;
   --color-unamba-yellow: #FFD700;
 }
+
+/* ==========================================================================
+   SOBREESCRITURA GLOBAL PANELMENU - IDENTIDAD UNAMBA PREMIUM (CON HOVER Y ANIMACIONES)
+   ========================================================================== */
+/* 1. Transparentar todos los contenedores y wrappers de menu y submenus */
+.sidebar-container .p-panelmenu,
+.mobile-sidebar .p-panelmenu,
+.sidebar-container .p-panelmenu-panel,
+.mobile-sidebar .p-panelmenu-panel,
+.sidebar-container .p-panelmenu-header,
+.mobile-sidebar .p-panelmenu-header,
+.sidebar-container .p-panelmenu-header-content,
+.mobile-sidebar .p-panelmenu-header-content,
+.sidebar-container .p-panelmenu-item,
+.mobile-sidebar .p-panelmenu-item,
+.sidebar-container .p-panelmenu-item-content,
+.mobile-sidebar .p-panelmenu-item-content {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* 2. Cabeceras del Menú (Headers) */
+.sidebar-container .p-panelmenu-header-link,
+.mobile-sidebar .p-panelmenu-header-link {
+    color: #ffffff !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.35rem !important;
+}
+
+.sidebar-container .p-panelmenu-header-link:hover,
+.mobile-sidebar .p-panelmenu-header-link:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    transform: translateX(4px) !important;
+}
+
+.sidebar-container .p-panelmenu-header-active > .p-panelmenu-header-content,
+.mobile-sidebar .p-panelmenu-header-active > .p-panelmenu-header-content {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    border-left: 3px solid #c29b57 !important; /* Dorado institucional */
+}
+
+/* Iconos y flechas de cabecera */
+.sidebar-container .p-panelmenu-header-icon,
+.mobile-sidebar .p-panelmenu-header-icon,
+.sidebar-container .p-panelmenu-header-link .p-menuitem-icon,
+.mobile-sidebar .p-panelmenu-header-link .p-menuitem-icon {
+    color: #ffffff !important;
+    transition: all 0.25s ease !important;
+}
+
+.sidebar-container .p-panelmenu-header-active .p-panelmenu-header-icon,
+.mobile-sidebar .p-panelmenu-header-active .p-panelmenu-header-icon {
+    transform: rotate(90deg) !important; /* Gira flecha */
+}
+
+/* 3. Contenedor de submenú expandido */
+.sidebar-container .p-panelmenu-content,
+.mobile-sidebar .p-panelmenu-content {
+    background: rgba(0, 0, 0, 0.12) !important; /* Agrupador sombreado */
+    border-radius: 8px !important;
+    margin-bottom: 0.4rem !important;
+    padding: 0.25rem 0 !important;
+    border: none !important;
+}
+
+/* 4. Sub-opciones de Menú */
+.sidebar-container .p-panelmenu-item-link,
+.mobile-sidebar .p-panelmenu-item-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    padding: 0.65rem 1rem 0.65rem 2.5rem !important;
+    border-radius: 6px !important;
+    margin: 0.15rem 0.5rem !important;
+    border-left: 3px solid transparent !important;
+    transition: all 0.2s ease !important;
+}
+
+.sidebar-container .p-panelmenu-item-link:hover,
+.mobile-sidebar .p-panelmenu-item-link:hover {
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+    border-left: 3px solid #c29b57 !important; /* Indicador dorado en hover */
+    transform: translateX(4px) !important;
+}
+
+.sidebar-container .p-panelmenu-item-link:hover *,
+.mobile-sidebar .p-panelmenu-item-link:hover *,
+.sidebar-container .p-panelmenu-item-link.router-link-active *,
+.mobile-sidebar .p-panelmenu-item-link.router-link-active *,
+.sidebar-container .p-panelmenu-item-link.p-highlight *,
+.mobile-sidebar .p-panelmenu-item-link.p-highlight * {
+    color: #ffffff !important;
+}
+
+/* Opcion seleccionada (Router Link activo) */
+.sidebar-container .p-panelmenu-item-link.router-link-active,
+.mobile-sidebar .p-panelmenu-item-link.router-link-active,
+.sidebar-container .p-panelmenu-item-link.p-highlight,
+.mobile-sidebar .p-panelmenu-item-link.p-highlight {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    border-left: 3px solid #c29b57 !important;
+    font-weight: 500 !important;
+}
+
+/* Iconos de submenú */
+.sidebar-container .p-panelmenu-item-icon,
+.mobile-sidebar .p-panelmenu-item-icon {
+    color: rgba(255, 255, 255, 0.7) !important;
+    transition: color 0.2s ease !important;
+}
+
+/* Evitar que las fotos de perfil se vean alargadas/deformadas */
+.object-cover {
+    object-fit: cover !important;
+}
+
+/* ==========================================================================
+   MODO OSCURO PREMIUM OVERRIDES
+   ========================================================================== */
+.my-app-dark {
+  background-color: #0f172a !important;
+  color: #f1f5f9;
+}
+
+/* Layout and main containers */
+.my-app-dark .layout-wrapper {
+  background-color: #0f172a !important;
+}
+
+.my-app-dark .content-wrapper,
+.my-app-dark .surface-ground,
+.my-app-dark .bg-gray-50,
+.my-app-dark .bg-slate-50,
+.my-app-dark .surface-100 {
+  background-color: #0f172a !important;
+}
+
+/* Cards & Surface Cards */
+.my-app-dark .surface-card,
+.my-app-dark .bg-white,
+.my-app-dark .card,
+.my-app-dark .surface-section {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+/* Borders and lines */
+.my-app-dark .border-bottom-1,
+.my-app-dark .border-top-1,
+.my-app-dark .border-1,
+.my-app-dark .border-bottom-2,
+.my-app-dark .surface-border {
+  border-color: #334155 !important;
+}
+
+/* Header Topbar Overrides */
+.my-app-dark header.topbar {
+  background-color: #1e293b !important;
+  border-bottom: 1px solid #334155 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Hardcoded text color overrides */
+.my-app-dark .text-slate-800,
+.my-app-dark .text-slate-700,
+.my-app-dark .text-900,
+.my-app-dark .text-800,
+.my-app-dark .text-700 {
+  color: #f1f5f9 !important;
+}
+
+.my-app-dark .text-slate-600,
+.my-app-dark .text-600,
+.my-app-dark .text-muted {
+  color: #cbd5e1 !important;
+}
+
+.my-app-dark .text-slate-400,
+.my-app-dark .text-500,
+.my-app-dark .text-400 {
+  color: #94a3b8 !important;
+}
+
+/* PrimeNG Data Table Dark Styling */
+.my-app-dark .p-datatable-header,
+.my-app-dark .p-datatable-thead > tr > th {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+.my-app-dark .p-datatable-tbody > tr {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+}
+
+.my-app-dark .p-datatable-tbody > tr:hover {
+  background-color: #334155 !important;
+}
+
+.my-app-dark .p-datatable-tbody > tr > td {
+  border-color: #334155 !important;
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Form Inputs and Interactive Controls */
+.my-app-dark .p-inputtext,
+.my-app-dark .p-dropdown,
+.my-app-dark .p-inputnumber-input,
+.my-app-dark .p-calendar .p-inputtext {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+
+.my-app-dark .p-inputtext:focus,
+.my-app-dark .p-dropdown:focus {
+  border-color: #3b82f6 !important;
+}
+
+.my-app-dark .p-dialog {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
+}
+
+.my-app-dark .p-dialog-header,
+.my-app-dark .p-dialog-content,
+.my-app-dark .p-dialog-footer {
+  background-color: #1e293b !important;
+  color: inherit !important;
+}
+
+/* Schedule and Calendar overrides */
+.my-app-dark .calendar-grid {
+  background-color: #334155 !important;
+  border-color: #334155 !important;
+}
+
+.my-app-dark .grid-time-label {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-right-color: #1a3b70 !important;
+}
+
+.my-app-dark .grid-bg-slot {
+  background-color: #0f172a !important;
+}
+
+.my-app-dark .course-card-inner {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+.my-app-dark .course-card-inner:hover {
+  background-color: #334155 !important;
+}
+
+.my-app-dark .course-name {
+  color: #ffea79 !important; /* Dorado UNAMBA más brillante en modo oscuro */
+}
+
+/* Standard button styles */
+.my-app-dark .p-button.p-button-secondary {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+.my-app-dark .p-button.p-button-secondary:hover {
+  background-color: #475569 !important;
+}
+
+.my-app-dark label,
+.my-app-dark .p-inputgroup-addon {
+  color: #f1f5f9 !important;
+  background-color: #334155 !important;
+  border-color: #475569 !important;
+}

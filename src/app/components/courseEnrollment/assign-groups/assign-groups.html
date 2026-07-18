@@ -1,57 +1,102 @@
-<div class="p-6">
-    <h2 class="text-2xl font-bold mb-4">Generación de Grupos Automática</h2>
-
-    <form [formGroup]="frmGroupAssignment" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-white p-4 rounded-lg shadow-sm border">
-        
-        <div class="field">
-            <label class="font-bold block mb-2">Escuela</label>
-            <p-select [options]="listSchool" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" class="w-full" />
-        </div>
-
-        <div class="field">
-            <label class="font-bold block mb-2">Buscar Curso</label>
-            <p-autoComplete 
-                formControlName="courseObject"
-                [suggestions]="courseSuggestions" 
-                (completeMethod)="searchCourse($event)" 
-                optionLabel="nameCourse" 
-                dataKey="idCourse" 
-                [delay]="300" 
-                (onSelect)="loadUnassignedStudents()"
-                placeholder="Escribe el nombre del curso..."
-                [dropdown]="false"
-                styleClass="w-full">
-            </p-autoComplete>
-        </div>
-    </form>
-
-    <div class="border rounded-md overflow-hidden bg-white shadow-sm">
-        <div class="flex justify-between items-center bg-gray-50 p-4 border-b">
-            <span class="font-bold text-gray-800">Alumnos Pendientes de Grupo: {{ unassignedStudents.length }}</span>
-            <p-button label="Generar y Asignar" severity="success" styleClass="rounded-full px-6 bg-green-500 border-green-500" [disabled]="unassignedStudents.length === 0 || frmGroupAssignment.invalid" (click)="assignRandomGroups()" />
-        </div>
-
-        <table class="w-full text-left border-collapse">
-            <thead class="border-b bg-gray-100">
-                <tr>
-                    <th class="p-3 text-sm font-bold text-gray-800">Código</th>
-                    <th class="p-3 text-sm font-bold text-gray-800">Nombre del Alumno</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if(unassignedStudents.length === 0) {
-                    <tr>
-                        <td colspan="2" class="p-6 text-center text-gray-500">Seleccione un curso para ver a los alumnos pendientes.</td>
-                    </tr>
-                } @else {
-                    @for(student of unassignedStudents; track $index) {
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3">{{ student.code }}</td>
-                            <td class="p-3 font-semibold">{{ student.fullName }}</td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+<div class="flex justify-content-center my-6 px-3">
+  <div class="surface-card border-1 surface-border shadow-2 border-round-2xl overflow-hidden w-full" style="max-width: 800px;">
+    <!-- Header Banner -->
+    <div class="px-5 py-4 text-white flex justify-content-between align-items-center border-bottom-1 surface-border" style="background: linear-gradient(135deg, #1e3a8a, #0f172a);">
+      <div>
+        <h2 class="text-xl font-bold text-white m-0">Generación de Grupos Automática</h2>
+        <p class="text-xs text-blue-100 mt-1 m-0">Seleccione la escuela y el curso para asignar automáticamente a los alumnos en grupos.</p>
+      </div>
+      <i class="pi pi-sitemap text-2xl text-blue-200"></i>
     </div>
+
+    <form [formGroup]="frmGroupAssignment" class="p-5 flex flex-column gap-4">
+      <div class="grid">
+        
+        <!-- Escuela -->
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="escuela" class="text-sm font-semibold text-700">
+            Escuela <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-select [options]="listSchool" id="escuela" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" appendTo="body" class="w-full" styleClass="w-full" />
+          @if ((idSchoolfb.touched || idSchoolfb.dirty) && idSchoolfb.errors && idSchoolfb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
+
+        <!-- Buscar Curso -->
+        <div class="col-12 md:col-6 flex flex-column gap-2">
+          <label for="curso" class="text-sm font-semibold text-700">
+            Buscar Curso <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-autoComplete 
+              inputId="curso"
+              formControlName="courseObject"
+              [suggestions]="courseSuggestions" 
+              (completeMethod)="searchCourse($event)" 
+              optionLabel="nameCourse" 
+              dataKey="idCourse" 
+              [delay]="300" 
+              (onSelect)="loadUnassignedStudents()"
+              placeholder="Escribe el nombre del curso..."
+              [dropdown]="false"
+              styleClass="w-full"
+              class="w-full">
+          </p-autoComplete>
+          @if ((courseObjectfb.touched || courseObjectfb.dirty) && courseObjectfb.errors && courseObjectfb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
+
+      </div>
+
+      <!-- Alumnos Pendientes Section -->
+      <div class="flex flex-column gap-3 mt-3">
+        <div class="flex align-items-center justify-content-between p-3 surface-100 border-round-lg border-1 surface-border">
+          <span class="font-bold text-800">Alumnos Pendientes de Grupo: {{ unassignedStudents.length }}</span>
+          <p-button label="Generar y Asignar" severity="success" icon="pi pi-cog" [disabled]="unassignedStudents.length === 0 || frmGroupAssignment.invalid" (click)="assignRandomGroups($event)" />
+        </div>
+
+        <div class="border-1 surface-border border-round-lg overflow-hidden">
+          <table class="w-full text-left border-collapse" style="width: 100%;">
+              <thead class="bg-light border-bottom surface-border">
+                  <tr>
+                      <th class="p-3 text-sm font-bold text-800" style="width: 30%;">Código</th>
+                      <th class="p-3 text-sm font-bold text-800" style="width: 70%;">Nombre del Alumno</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  @if(unassignedStudents.length === 0) {
+                      <tr>
+                          <td colspan="2" class="p-4 text-center text-500">Seleccione un curso para ver a los alumnos pendientes.</td>
+                      </tr>
+                  } @else {
+                      @for(student of unassignedStudents; track $index) {
+                          <tr class="border-bottom last:border-none surface-border">
+                              <td class="p-3 text-sm">{{ student.code }}</td>
+                              <td class="p-3 text-sm font-semibold text-800">{{ student.fullName }}</td>
+                          </tr>
+                      }
+                  }
+              </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Toast and ConfirmDialog -->
+      <div class="flex justify-content-end">
+        <p-toast />
+        <p-confirmdialog>
+            <ng-template #message let-message>
+                @if (message) {
+                    <div class="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border p-4">
+                        <i [ngClass]="message.icon" class="text-5xl text-primary"></i>
+                        <p class="text-base text-700 m-0">{{ message.message }}</p>
+                    </div>
+                }
+            </ng-template>
+        </p-confirmdialog>
+      </div>
+
+    </form>
+  </div>
 </div>

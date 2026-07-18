@@ -1,0 +1,531 @@
+<div class="register-container">
+  
+  
+  <div class="banner-header">
+    <div class="banner-content">
+      <div class="banner-left">
+        <h1 class="univ-title">UNIVERSIDAD NACIONAL MICAELA BASTIDAS DE APURÍMAC</h1>
+        <h2 class="univ-subtitle">VICERRECTORADO ACADÉMICO</h2>
+        <h3 class="univ-dept">DIRECCIÓN DE SERVICIOS ACADÉMICOS – OFICINA DE REGISTRO Y ARCHIVOS</h3>
+        
+        <div class="banner-grid mt-4" *ngIf="groupInfo">
+          <div>
+            <span class="label">Escuela Académico Profesional:</span>
+            <span class="value">{{ groupInfo.schoolName }}</span>
+          </div>
+          <div>
+            <span class="label">Código de Asignatura:</span>
+            <span class="value font-mono">{{ groupInfo.courseCode }}</span>
+          </div>
+          <div>
+            <span class="label">Semestre:</span>
+            <span class="value">{{ groupInfo.semesterName }}</span>
+          </div>
+          <div>
+            <span class="label">Creditaje:</span>
+            <span class="value">{{ groupInfo.credits }}</span>
+          </div>
+          <div>
+            <span class="label">Asignatura:</span>
+            <span class="value">{{ groupInfo.courseName }}</span>
+          </div>
+          <div>
+            <span class="label">Grupo:</span>
+            <span class="value font-bold">{{ groupInfo.nameGroup }}</span>
+          </div>
+          <div class="col-span-2">
+            <span class="label">Docente:</span>
+            <span class="value">{{ groupInfo.professorName }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="banner-right">
+        <div class="logo-box">
+          <i class="pi pi-book text-4xl text-slate-200"></i>
+          <span class="text-xs mt-1 text-slate-300 font-mono">UNAMBA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="concurrency-warning shadow-2" *ngIf="activeEditors && activeEditors.length > 0">
+    <i class="pi pi-exclamation-triangle mr-2 text-xl"></i>
+    <div>
+      <span class="fw-bold">Advertencia de Edición Concurrente:</span>
+      <span class="text-muted ml-1">
+        Las siguientes personas también están visualizando/editando este grupo:
+        <strong>{{ activeEditors.join(', ') }}</strong>. 
+        Para evitar conflictos de calificaciones, coordine con ellos o recargue la página.
+      </span>
+    </div>
+  </div>
+
+  
+  <div class="control-panel">
+    <div class="tabs-group">
+      <button 
+        type="button"
+        class="tab-btn" 
+        [class.active]="currentTab === 'notas'" 
+        (click)="currentTab = 'notas'">
+        <i class="pi pi-file-edit mr-2"></i>
+        Notas Obtenidas
+      </button>
+      <button 
+        type="button"
+        class="tab-btn" 
+        [class.active]="currentTab === 'asistencias'" 
+        (click)="currentTab = 'asistencias'">
+        <i class="pi pi-calendar mr-2"></i>
+        Control de Asistencias
+      </button>
+    </div>
+
+    <div class="actions-group">
+      
+      <div class="autosave-indicator" [class]="autoSaveStatus" *ngIf="groupInfo && !groupInfo.closed">
+        <i class="pi" 
+           [class.pi-spin]="autoSaveStatus === 'saving'" 
+           [class.pi-spinner]="autoSaveStatus === 'saving'" 
+           [class.pi-check-circle]="autoSaveStatus === 'saved'" 
+           [class.pi-exclamation-circle]="autoSaveStatus === 'dirty' || autoSaveStatus === 'offline-saved'"></i>
+        <span class="ml-1">
+          {{ autoSaveStatus === 'saved' ? 'Cambios guardados' : 
+             (autoSaveStatus === 'saving' ? 'Guardando en segundo plano...' : 
+              (autoSaveStatus === 'offline-saved' ? 'Guardado localmente (Sin conexión)' : 'Cambios sin guardar')) }}
+        </span>
+      </div>
+
+      <button 
+        type="button"
+        class="btn btn-secondary" 
+        (click)="goBack()">
+        <i class="pi pi-arrow-left mr-1"></i> Volver
+      </button>
+      
+      <ng-container *ngIf="groupInfo && !groupInfo.closed">
+        <button 
+          type="button"
+          class="btn btn-secondary" 
+          (click)="openWeightsDialog()">
+          <i class="pi pi-percentage mr-1"></i> Configurar Pesos
+        </button>
+        <button 
+          type="button"
+          class="btn btn-info" 
+          (click)="addNewUnit()">
+          <i class="pi pi-plus-circle mr-1"></i> Agregar Unidad
+        </button>
+        <button 
+          type="button"
+          class="btn btn-primary" 
+          [disabled]="saving"
+          (click)="saveChanges()">
+          <i class="pi" [class.pi-spin]="saving" [class.pi-save]="!saving"></i> 
+          {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+        <button 
+          type="button"
+          class="btn btn-danger" 
+          [disabled]="closing"
+          (click)="closeRegister()">
+          <i class="pi" [class.pi-spin]="closing" [class.pi-lock]="!closing"></i> 
+          Cerrar Acta
+        </button>
+      </ng-container>
+      
+      <span *ngIf="groupInfo?.closed" class="closed-badge">
+        <i class="pi pi-lock-open mr-1"></i> Acta Cerrada (Lectura)
+      </span>
+    </div>
+  </div>
+
+  
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+    <p class="mt-2 text-slate-600 font-medium">Cargando datos de la planilla académica...</p>
+  </div>
+
+  
+  <div class="sheet-viewport" *ngIf="!loading">
+    
+    
+    <div class="sheet-container" *ngIf="currentTab === 'notas'">
+      <table class="excel-table">
+        <thead>
+          
+          <tr>
+            <th rowspan="2" class="col-num">Nº</th>
+            <th rowspan="2" class="col-code">CÓDIGO EST</th>
+            <th rowspan="2" class="col-name">APELLIDOS Y NOMBRES</th>
+            
+            <ng-container *ngFor="let unit of units; let uIdx = index">
+              
+              <th [attr.colspan]="ccCounts[uIdx] + cpCounts[uIdx] + tCounts[uIdx] + 2" class="col-unit-header position-relative">
+                UNIDAD {{ unit.numberUnit }} (C: {{ groupInfo?.conceptualWeight * 100 }}%, P: {{ groupInfo?.practicalWeight * 100 }}%, A: {{ groupInfo?.attitudinalWeight * 100 }}%)
+                <button *ngIf="!groupInfo?.closed && uIdx === units.length - 1 && units.length > 1" type="button" class="btn-delete-unit" (click)="deleteUnit(unit.idUnits, uIdx)" title="Eliminar esta unidad">
+                  <i class="pi pi-trash" style="font-size: 0.65rem;"></i>
+                </button>
+              </th>
+            </ng-container>
+            
+            <th rowspan="2" class="col-final">PPF</th>
+            <th rowspan="2" class="col-status">ESTADO</th>
+          </tr>
+          
+          <tr>
+            <ng-container *ngFor="let unit of units; let uIdx = index">
+              
+              <th *ngFor="let ccIdx of getRange(ccCounts[uIdx]); let isLast = last" class="col-grade position-relative">
+                CC{{ unit.numberUnit }}<span *ngIf="ccCounts[uIdx] > 1">.{{ ccIdx + 1 }}</span>
+                <div class="col-actions-container" *ngIf="isLast && !groupInfo?.closed">
+                  <button type="button" class="btn-add-col" (click)="addCcColumn(uIdx)" title="Agregar sub-criterio Conceptual">
+                    <i class="pi pi-plus" style="font-size: 0.6rem;"></i>
+                  </button>
+                  <button *ngIf="ccCounts[uIdx] > 1" type="button" class="btn-remove-col" (click)="removeCcColumn(uIdx)" title="Eliminar último sub-criterio Conceptual">
+                    <i class="pi pi-minus" style="font-size: 0.6rem;"></i>
+                  </button>
+                </div>
+              </th>
+              
+              
+              <th *ngFor="let cpIdx of getRange(cpCounts[uIdx]); let isLast = last" class="col-grade position-relative">
+                CP{{ unit.numberUnit }}<span *ngIf="cpCounts[uIdx] > 1">.{{ cpIdx + 1 }}</span>
+                <div class="col-actions-container" *ngIf="isLast && !groupInfo?.closed">
+                  <button type="button" class="btn-add-col" (click)="addCpColumn(uIdx)" title="Agregar sub-criterio Práctico">
+                    <i class="pi pi-plus" style="font-size: 0.6rem;"></i>
+                  </button>
+                  <button *ngIf="cpCounts[uIdx] > 1" type="button" class="btn-remove-col" (click)="removeCpColumn(uIdx)" title="Eliminar último sub-criterio Práctico">
+                    <i class="pi pi-minus" style="font-size: 0.6rem;"></i>
+                  </button>
+                </div>
+              </th>
+              
+              
+              <th *ngFor="let tIdx of getRange(tCounts[uIdx]); let isLast = last" class="col-grade position-relative">
+                T{{ tIdx + 1 }}
+                <div class="col-actions-container" *ngIf="isLast && !groupInfo?.closed">
+                  <button type="button" class="btn-add-col" (click)="addTColumn(uIdx)" title="Agregar tarea o examen">
+                    <i class="pi pi-plus" style="font-size: 0.6rem;"></i>
+                  </button>
+                  <button *ngIf="tCounts[uIdx] > 1" type="button" class="btn-remove-col" (click)="removeTColumn(uIdx)" title="Eliminar última tarea o examen">
+                    <i class="pi pi-minus" style="font-size: 0.6rem;"></i>
+                  </button>
+                </div>
+              </th>
+              
+              
+              <th class="col-grade-final" title="Criterio Actitudinal (Promedio de Tareas)">CA{{ unit.numberUnit }}</th>
+              <th class="col-grade-final" title="Promedio Final de Unidad">PF{{ unit.numberUnit }}</th>
+            </ng-container>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of students; let i = index" class="hover:bg-slate-50 transition-colors">
+            <td class="text-center bg-slate-100 font-medium">{{ i + 1 }}</td>
+            <td class="font-mono text-center text-xs text-slate-600 bg-slate-50">{{ student.code }}</td>
+            <td class="px-3 font-medium text-slate-800 text-left bg-slate-50">{{ student.fullName }}</td>
+            
+            <ng-container *ngFor="let uScore of student.unitScores; let uIdx = index">
+              
+              <td *ngFor="let ccIdx of getRange(ccCounts[uIdx])" class="cell-editable" [class.cell-nsp]="uScore.conceptualGradesList[ccIdx] === -1">
+                <input 
+                  type="text" 
+                  [value]="displayGrade(uScore.conceptualGradesList[ccIdx])" 
+                  [disabled]="groupInfo?.closed"
+                  (blur)="onCcGradeInput($event, student, ccIdx, uIdx)"
+                  (keydown)="onInputKeyDown($event)"
+                  placeholder="-"
+                  maxlength="3" />
+              </td>
+
+              
+              <td *ngFor="let cpIdx of getRange(cpCounts[uIdx])" class="cell-editable" [class.cell-nsp]="uScore.practicalGradesList[cpIdx] === -1">
+                <input 
+                  type="text" 
+                  [value]="displayGrade(uScore.practicalGradesList[cpIdx])" 
+                  [disabled]="groupInfo?.closed"
+                  (blur)="onCpGradeInput($event, student, cpIdx, uIdx)"
+                  (keydown)="onInputKeyDown($event)"
+                  placeholder="-"
+                  maxlength="3" />
+              </td>
+
+              
+              <td *ngFor="let tIdx of getRange(tCounts[uIdx])" class="cell-editable" [class.cell-nsp]="uScore.testGradesList[tIdx] === -1">
+                <input 
+                  type="text" 
+                  [value]="displayGrade(uScore.testGradesList[tIdx])" 
+                  [disabled]="groupInfo?.closed"
+                  (blur)="onTGradeInput($event, student, tIdx, uIdx)"
+                  (keydown)="onInputKeyDown($event)"
+                  placeholder="-"
+                  maxlength="3" />
+              </td>
+
+              
+              <td class="cell-computed font-bold text-center">
+                {{ (uScore.attitudinalScore !== null ? (uScore.attitudinalScore | number:'1.0-1') : '-') }}
+              </td>
+
+              
+              <td class="cell-computed font-bold">
+                {{ calculateUnitPf(student, uIdx) | number:'1.0-0' }}
+              </td>
+            </ng-container>
+
+            
+            <td class="cell-ppf font-extrabold text-center text-lg" 
+                [class.text-green-700]="getStudentState(student) === 'Aprobado'" 
+                [class.text-amber-600]="getStudentState(student) === 'Sustitutorio'"
+                [class.text-red-600]="getStudentState(student) === 'Desaprobado'">
+              {{ calculatePpf(student) }}
+            </td>
+            
+            
+            <td class="text-center py-1">
+              <span class="status-badge" 
+                [class.status-pending]="getStudentState(student) === 'Pendiente'"
+                [class.status-approved]="getStudentState(student) === 'Aprobado'"
+                [class.status-failed]="getStudentState(student) === 'Desaprobado'"
+                [class.status-sustitutorio]="getStudentState(student) === 'Sustitutorio'"
+                [class.status-nsp]="getStudentState(student) === 'NSP'">
+                {{ getStudentState(student) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    
+    <div class="sheet-container" *ngIf="currentTab === 'asistencias'">
+      <table class="excel-table">
+        <thead>
+          <tr>
+            <th rowspan="3" class="col-num">Nº</th>
+            <th rowspan="3" class="col-code">CÓDIGO EST</th>
+            <th rowspan="3" class="col-name">APELLIDOS Y NOMBRES</th>
+            
+            <th [attr.colspan]="classDates.length" class="col-attendance-header">REGISTRO DIARIO DE ASISTENCIA</th>
+            
+            <th rowspan="2" colspan="4" class="col-summary-header">RESUMEN</th>
+          </tr>
+          <tr>
+            
+            <th *ngFor="let wk of weeks" [attr.colspan]="wk.dates.length" class="col-week-header text-xs text-center font-bold bg-slate-200 text-slate-700 py-1 border border-slate-300">
+              {{ wk.name }}
+            </th>
+          </tr>
+          <tr>
+            <ng-container *ngFor="let dateStr of classDates">
+              <th class="col-date" title="Clase el {{ dateStr }}">
+                <div class="date-header-text">{{ dateStr.substring(0, 5) }}</div>
+              </th>
+            </ng-container>
+            <th class="col-sum-stat col-sum-a" title="Asistencias">A</th>
+            <th class="col-sum-stat col-sum-f" title="Faltas">F</th>
+            <th class="col-sum-stat col-sum-t" title="Tardanzas">T</th>
+            <th class="col-sum-stat col-sum-j" title="Justificados">J</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of students; let i = index">
+            <td class="text-center bg-slate-100 font-medium">{{ i + 1 }}</td>
+            <td class="font-mono text-center text-xs text-slate-600 bg-slate-50">{{ student.code }}</td>
+            <td class="px-3 font-medium text-slate-800 text-left bg-slate-50">{{ student.fullName }}</td>
+            
+            <ng-container *ngFor="let att of student.attendances">
+              <td class="cell-attendance-select" 
+                  [class.att-a]="att.status === 'A'"
+                  [class.att-f]="att.status === 'F'"
+                  [class.att-t]="att.status === 'T'"
+                  [class.att-j]="att.status === 'J'">
+                <select 
+                  [(ngModel)]="att.status" 
+                  (ngModelChange)="markDirty()"
+                  [disabled]="groupInfo?.closed"
+                  class="attendance-dropdown">
+                  <option value="">-</option>
+                  <option value="A">A</option>
+                  <option value="F">F</option>
+                  <option value="T">T</option>
+                  <option value="J">J</option>
+                </select>
+              </td>
+            </ng-container>
+
+            
+            <td class="bg-emerald-50 text-emerald-800 font-bold text-center">{{ getAttendanceCount(student, 'A') }}</td>
+            <td class="bg-rose-50 text-rose-800 font-bold text-center">{{ getAttendanceCount(student, 'F') }}</td>
+            <td class="bg-amber-50 text-amber-800 font-bold text-center">{{ getAttendanceCount(student, 'T') }}</td>
+            <td class="bg-sky-50 text-sky-800 font-bold text-center">{{ getAttendanceCount(student, 'J') }}</td>
+          </tr>
+
+          
+          <tr class="row-summary font-bold">
+            <td colspan="3" class="text-right bg-slate-100 pr-3 text-sm text-slate-700 font-bold">Asistencia</td>
+            <td *ngFor="let dateStr of classDates" class="text-center bg-blue-50 text-blue-900 text-sm font-bold">
+              {{ getColumnAttendanceCount(dateStr, 'A') }}
+            </td>
+            <td colspan="4" class="bg-slate-50"></td>
+          </tr>
+          
+          <tr class="row-summary font-bold">
+            <td colspan="3" class="text-right bg-slate-100 pr-3 text-sm text-slate-700 font-bold">Falta</td>
+            <td *ngFor="let dateStr of classDates" class="text-center bg-red-50 text-red-900 text-sm font-bold">
+              {{ getColumnAttendanceCount(dateStr, 'F') }}
+            </td>
+            <td colspan="4" class="bg-slate-50"></td>
+          </tr>
+          
+          <tr class="row-summary font-bold">
+            <td colspan="3" class="text-right bg-slate-100 pr-3 text-sm text-slate-700 font-bold">Tardanza</td>
+            <td *ngFor="let dateStr of classDates" class="text-center bg-amber-50 text-amber-900 text-sm font-bold">
+              {{ getColumnAttendanceCount(dateStr, 'T') }}
+            </td>
+            <td colspan="4" class="bg-slate-50"></td>
+          </tr>
+          
+          <tr class="row-summary font-bold">
+            <td colspan="3" class="text-right bg-slate-100 pr-3 text-sm text-slate-700 font-bold">Justificado</td>
+            <td *ngFor="let dateStr of classDates" class="text-center bg-slate-100 text-slate-700 text-sm font-bold">
+              {{ getColumnAttendanceCount(dateStr, 'J') }}
+            </td>
+            <td colspan="4" class="bg-slate-50"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<div class="modal-overlay" *ngIf="showSaveConfirmModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <i class="pi pi-question-circle modal-icon text-amber-500"></i>
+      <h3>Confirmar Acción</h3>
+    </div>
+    <div class="modal-body">
+      ¿Desea guardar los cambios en la base de datos?
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="showSaveConfirmModal = false">No</button>
+      <button type="button" class="btn btn-primary" (click)="confirmSave()">Sí</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" *ngIf="showSaveSuccessModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <i class="pi pi-check-circle modal-icon text-emerald-500"></i>
+      <h3>Éxito</h3>
+    </div>
+    <div class="modal-body">
+      Se guardaron las notas y asistencias correctamente en la base de datos.
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="showSaveSuccessModal = false">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" *ngIf="showCloseConfirmModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <i class="pi pi-exclamation-triangle modal-icon text-red-500"></i>
+      <h3>Cerrar Acta</h3>
+    </div>
+    <div class="modal-body">
+      ¿Estás seguro de que deseas cerrar el acta de este grupo de forma permanente?<br><br>
+      Se calculará el promedio final oficial y se cerrará el registro. Esta acción es irreversible.
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="showCloseConfirmModal = false">No</button>
+      <button type="button" class="btn btn-danger" (click)="confirmCloseRegister()">Sí</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" *ngIf="showCloseSuccessModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <i class="pi pi-lock modal-icon text-emerald-500"></i>
+      <h3>Acta Cerrada</h3>
+    </div>
+    <div class="modal-body">
+      ¡Éxito! El acta se ha cerrado correctamente y las notas oficiales han sido grabadas.
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="showCloseSuccessModal = false">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal-overlay" *ngIf="showDeleteUnitConfirmModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <i class="pi pi-exclamation-triangle modal-icon text-red-500"></i>
+      <h3>Eliminar Unidad</h3>
+    </div>
+    <div class="modal-body">
+      ¿Estás seguro de que deseas eliminar la Unidad {{ unitToDeleteNumber }}?<br><br>
+      Esta acción también eliminará de forma permanente todas las notas registradas para esta unidad en la base de datos. Esta acción no se puede deshacer.
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="cancelDeleteUnit()">No</button>
+      <button type="button" class="btn btn-danger" (click)="confirmDeleteUnit()">Sí</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Configurar Pesos de Evaluaciones -->
+<div class="modal-overlay" *ngIf="showWeightsModal">
+  <div class="modal-card" style="max-width: 450px;">
+    <div class="modal-header">
+      <i class="pi pi-percentage modal-icon text-blue-500"></i>
+      <h3>Configurar Pesos del Grupo</h3>
+    </div>
+    <div class="modal-body">
+      <p class="text-sm text-gray-600 mb-4">
+        Establezca el peso porcentual para cada tipo de evaluación. La suma de los tres porcentajes debe ser exactamente <strong>100%</strong>.
+      </p>
+      
+      <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 600; color: #4b5563;">Peso Conceptual (%):</label>
+          <input type="number" [(ngModel)]="weightConceptual" class="form-input" style="width: 100px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px;" min="0" max="100" />
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 600; color: #4b5563;">Peso Práctico (%):</label>
+          <input type="number" [(ngModel)]="weightPractical" class="form-input" style="width: 100px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px;" min="0" max="100" />
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-weight: 600; color: #4b5563;">Peso Actitudinal (%):</label>
+          <input type="number" [(ngModel)]="weightAttitudinal" class="form-input" style="width: 100px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px;" min="0" max="100" />
+        </div>
+      </div>
+
+      <div *ngIf="weightConceptual + weightPractical + weightAttitudinal !== 100" style="margin-top: 15px; color: #ef4444; font-size: 0.85rem; font-weight: 500;">
+        ⚠️ La suma actual es {{ weightConceptual + weightPractical + weightAttitudinal }}%. Debe ser exactamente 100%.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="showWeightsModal = false">Cancelar</button>
+      <button type="button" class="btn btn-primary" [disabled]="weightConceptual + weightPractical + weightAttitudinal !== 100" (click)="saveWeights()">Guardar Pesos</button>
+    </div>
+  </div>
+</div>

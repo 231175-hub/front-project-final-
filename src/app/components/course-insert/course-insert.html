@@ -1,78 +1,123 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-    <form [formGroup]="frmInsertCourse">
-        <div class="card flex justify-center">
-            <label for="school">Ingrese una Escuela Profesional</label>
-            <p-select [options]="listSchool" id="school" formControlName="idSchool" optionLabel="nameSchool" optionValue="idSchool" [filter]="true"  placeholder="Seleccione una Escuela" class="w-full md:w-56" />
-        </div>
-
-        <div class="card flex justify-center">
-            <label for="semester">Ingrese el semestre del curso</label>
-            <p-select [options]="listSemester" id="semester" formControlName="idSemester" optionLabel="numberSemester" optionValue="idSemester" placeholder="Selecciona un Semestre" class="w-full md:w-56" />
-        </div>
-
-        <div class="card flex justify-center">
-            <label for="code">Ingrese el codigo del curso</label>
-            <input type="text" id="code" pInputText formControlName="code" placeholder="Codigo" />
-        </div>
-        <div class="card flex justify-center">
-            <label for="credits">Ingrese los creditos del curso</label>
-            <input type="text" id="credits" pInputText formControlName="credits" placeholder="Creditos" />
-        </div>
-        <div class="card flex justify-center">
-            <label for="nameCourse">Ingrese los nombre del curso</label>
-            <input type="text" id="nameCourse" pInputText formControlName="nameCourse" placeholder="Nombre" />
-        </div>
-        <div class="card flex justify-center">
-            <label for="nameCourse">Ingrese la categoria del curso</label>
-            <p-select [options]="categories" formControlName="category" optionLabel="category" optionValue="category" placeholder="Selecciona una categoria" class="w-full md:w-56" />
-        </div>
-        <div class="card flex justify-center">
-            <label for="conceptualWeight">Ingrese el peso Conceptual del curso</label>
-            <input type="text" id="conceptualWeight" pInputText formControlName="conceptualWeight" placeholder="Peso Conceptual" />
-        </div>
-        <div class="card flex justify-center">
-            <label for="practicalWeight">Ingrese el peso Practico del curso</label>
-            <input type="text" id="practicalWeight" pInputText formControlName="practicalWeight" placeholder="Peso Practico" />
-        </div>
-        <div class="card flex justify-center">
-            <label for="attitudinalWeight">Ingrese el peso Actitudinaldel curso</label>
-            <input type="text" id="attitudinalWeight" pInputText formControlName="attitudinalWeight" placeholder="Peso Actitudinal" />
-        </div>
-    </form>
-
-
-    <div class="flex flex-col gap-2">
-        <div class="flex items-center gap-4 mb-2">
-            <p-button label="Agregar Unidades" styleClass="bg-black hover:bg-gray-800 border-black text-white rounded-full px-4" (click)="addUnit()" />
-            <span class="text-red-300 font-semibold text-sm">Datos opcionales</span>
-        </div>
-
-        <div class="border rounded-md overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead class="border-b bg-gray-50">
-                    <tr>
-                        <th class="p-3 text-sm font-bold text-gray-800 text-center">Descripción</th>
-                        <th class="p-3 text-sm font-bold text-gray-800 text-center w-32">ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for(value of unitRowList; track value.id) {
-                        <tr class="border-b last:border-none">
-                            <td class="p-2 text-center">
-                                <input type="text" value="{{ value.id }}" readonly pInputText />
-                            </td>
-                            <td class="p-2 text-center">
-                                <p-button label="Retirar" severity="danger" styleClass="bg-orange-500 hove:bg-orange-600 border-orange-600 text-white rounded-full p-button-sm px-4" (click)="removeUnit(value)" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+<p-toast></p-toast>
+<div class="flex justify-content-center my-6 px-3">
+  <div class="surface-card border-1 surface-border shadow-2 border-round-2xl overflow-hidden w-full" style="max-width: 900px;">
+    <!-- Header Banner -->
+    <div class="px-5 py-4 text-white flex justify-content-between align-items-center" style="background: linear-gradient(to right, var(--blue-700), var(--indigo-900));">
+      <div>
+        <h2 class="text-xl font-bold text-white m-0">Registrar Curso</h2>
+        <p class="text-xs text-blue-100 mt-1 m-0">Complete la información del curso y agregue las unidades académicas correspondientes.</p>
+      </div>
+      <i class="pi pi-book text-2xl text-blue-200"></i>
     </div>
-</div>
+    
+    <div class="p-5 flex flex-column gap-4">
+      <div class="grid">
+        <!-- Left Side: Form Details -->
+        <div class="col-12 md:col-6">
+          <form [formGroup]="frmInsertCourse" class="flex flex-column gap-3">
+            
+            <!-- Escuela -->
+            <div class="flex flex-column gap-2">
+              <label for="school" class="text-sm font-semibold text-700">Escuela Profesional <span class="text-red-500 font-bold">*</span></label>
+              <p-select [options]="listSchool" id="school" formControlName="idSchool" optionLabel="nameSchool" optionValue="idSchool" [filter]="true" placeholder="Seleccione una Escuela" class="w-full" styleClass="w-full" />
+              @if ((idSchoolfb.touched || idSchoolfb.dirty) && idSchoolfb.errors && idSchoolfb.hasError('required')) {
+                <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+              }
+            </div>
 
-<div class="flex justify-end border-t pt-4 mt-2">
-    <p-button label="Registrar datos" severity="info" (click)="sendInsertCourse($event)" styleClass="rounded-full px-6" />
+            <!-- Código -->
+            <div class="flex flex-column gap-2">
+              <label for="code" class="text-sm font-semibold text-700">Código del Curso <span class="text-red-500 font-bold">*</span></label>
+              <input type="text" id="code" pInputText formControlName="code" placeholder="Código (ej: INF-101)" class="w-full" />
+              @if ((codefb.touched || codefb.dirty) && codefb.errors && codefb.hasError('required')) {
+                <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+              }
+            </div>
+
+            <!-- Créditos -->
+            <div class="flex flex-column gap-2">
+              <label for="credits" class="text-sm font-semibold text-700">Créditos del Curso <span class="text-red-500 font-bold">*</span></label>
+              <input type="text" id="credits" pInputText formControlName="credits" placeholder="Número de Créditos" class="w-full" />
+              @if ((creditsfb.touched || creditsfb.dirty) && creditsfb.errors && creditsfb.hasError('required')) {
+                <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+              }
+            </div>
+
+            <!-- Nombre -->
+            <div class="flex flex-column gap-2">
+              <label for="nameCourse" class="text-sm font-semibold text-700">Nombre del Curso <span class="text-red-500 font-bold">*</span></label>
+              <input type="text" id="nameCourse" pInputText formControlName="nameCourse" placeholder="Nombre de la asignatura" class="w-full" />
+              @if ((nameCoursefb.touched || nameCoursefb.dirty) && nameCoursefb.errors && nameCoursefb.hasError('required')) {
+                <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+              }
+            </div>
+
+            <!-- Categoría -->
+            <div class="flex flex-column gap-2">
+              <label for="category" class="text-sm font-semibold text-700">Categoría del Curso <span class="text-red-500 font-bold">*</span></label>
+              <p-select [options]="categories" id="category" formControlName="category" optionLabel="category" optionValue="category" placeholder="Selecciona una categoría" class="w-full" styleClass="w-full" />
+              @if ((categoryfb.touched || categoryfb.dirty) && categoryfb.errors && categoryfb.hasError('required')) {
+                <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+              }
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Right Side: Units (Mandatory) -->
+        <div class="col-12 md:col-6 pl-0 md:pl-4 mt-4 md:mt-0 flex flex-column gap-3">
+          <div class="flex align-items-center justify-content-between">
+            <span class="font-bold text-700 text-sm">Unidades del Curso <span class="text-red-500 font-bold">*</span></span>
+            <p-button label="Agregar Unidad" icon="pi pi-plus" size="small" [outlined]="true" (click)="addUnit()" />
+          </div>
+
+          <div class="border-1 surface-border border-round-xl overflow-hidden bg-gray-50 flex-grow-1 flex flex-column min-h-20rem">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-gray-100 border-bottom-1 surface-border">
+                  <th class="p-3 text-left font-bold text-700 text-sm">Descripción</th>
+                  <th class="p-3 text-center font-bold text-700 text-sm w-8rem">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for(value of unitRowList; track value.id) {
+                  <tr class="border-bottom-1 surface-border last:border-none bg-white">
+                    <td class="p-3">
+                      <span class="font-medium text-700">{{ value.id }}</span>
+                    </td>
+                    <td class="p-2 text-center">
+                      <p-button 
+                          icon="pi pi-trash" 
+                          label="Retirar" 
+                          [outlined]="true" 
+                          severity="danger" 
+                          size="small" 
+                          (click)="removeUnit(value)" />
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="2" class="p-5 text-center text-500 text-sm">
+                      <i class="pi pi-info-circle text-xl mb-2 block"></i>
+                      No se han agregado unidades a este curso.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (unitsTouched && unitRowList.length === 0) {
+            <small class="text-red-500 text-xs font-medium">Debe agregar al menos una unidad.</small>
+          }
+        </div>
+
+      </div>
+
+      <!-- Footer Action Button -->
+      <div class="flex justify-content-end pt-4 border-top-1 surface-border">
+        <p-button label="Registrar Curso" icon="pi pi-save" (click)="sendInsertCourse($event)" styleClass="px-4 border-round-lg" />
+      </div>
+
+    </div>
+  </div>
 </div>

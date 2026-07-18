@@ -1,0 +1,295 @@
+.schedule-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    margin: 16px;
+}
+
+.schedule-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a3b70; /* Azul UNAMBA */
+    margin-bottom: 4px;
+}
+
+.schedule-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+.btn-print-pdf {
+    background-color: #1a3b70 !important;
+    border-color: #1a3b70 !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+.btn-print-pdf:hover {
+    background-color: #122b54 !important;
+    border-color: #122b54 !important;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+.schedule-table th {
+    background-color: #1a3b70; /* Azul UNAMBA */
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 12px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.schedule-table td {
+    border: 1px solid #e2e8f0;
+    padding: 0;
+    vertical-align: top;
+}
+
+.hour-cell {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    text-align: center;
+    vertical-align: middle !important;
+    padding: 8px !important;
+    border-right: 2px solid #1a3b70 !important;
+    font-size: 12px;
+}
+
+.hour-range {
+    display: block;
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+/* Celdas del Horario */
+.schedule-grid-cell {
+    height: 72px;
+    padding: 3px !important;
+    vertical-align: middle !important;
+}
+
+.courses-cell-container {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Tarjetas de Cursos */
+.course-card {
+    background-color: #f8fafc;
+    border-left: 4px solid #c29b57; /* Dorado UNAMBA */
+    color: #1e293b;
+    padding: 6px 8px;
+    height: 100%;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center; /* Centrado horizontal de elementos */
+    text-align: center;  /* Centrado de texto */
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.course-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+    background-color: #ffffff;
+    border-color: #cbd5e1;
+}
+
+.course-name {
+    font-weight: 700;
+    font-size: 11px;
+    color: #1a3b70; /* Azul UNAMBA */
+    line-height: 1.2;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.course-group {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 2px;
+}
+
+.course-room {
+    font-size: 10px;
+    font-weight: 600;
+    color: #c29b57; /* Dorado UNAMBA */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centrar icono e información */
+}
+
+.course-room i {
+    font-size: 10px;
+    margin-right: 3px;
+}
+
+/* Tarjeta dividida ante cruce de horario */
+.course-card.split-card {
+    border-left: 3px solid #ef4444 !important; /* Rojo Intenso */
+    background-color: #fef2f2; /* Fondo Rojo Suave */
+    border-color: #fca5a5;
+}
+
+.course-card.split-card:hover {
+    background-color: #fff5f5;
+    border-color: #f87171;
+}
+
+.course-card.split-card .course-name {
+    color: #991b1b;
+    font-size: 9px;
+}
+
+.course-card.split-card .course-group {
+    color: #7f1d1d;
+    font-size: 8px;
+}
+
+.course-card.split-card .course-room {
+    color: #b91c1c;
+    font-size: 8px;
+}
+
+.course-card.split-card .course-room i {
+    font-size: 8px;
+}
+
+/* CSS Grid Calendar Layout Styles */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 80px repeat(5, minmax(120px, 1fr));
+  grid-template-rows: 45px repeat(16, 72px); /* 16 hours from 7:00 to 22:00 */
+  gap: 1px;
+  background-color: #e2e8f0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.grid-header-cell {
+  background-color: #1a3b70; /* Azul UNAMBA */
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+  grid-row: 1;
+  z-index: 5;
+}
+
+.grid-header-cell.time-col {
+  background-color: #122b54;
+}
+
+.grid-time-label {
+  grid-column: 1;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 2px solid #1a3b70;
+  font-size: 0.8rem;
+  color: #475569;
+  z-index: 3;
+}
+
+.grid-bg-slot {
+  background-color: #ffffff;
+  z-index: 1;
+}
+
+.grid-course-card {
+  z-index: 2;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.grid-course-card .courses-cell-container {
+  height: 100%;
+  display: flex;
+  gap: 4px;
+}
+
+.grid-course-card .course-card-inner {
+  background-color: #f8fafc;
+  border-left: 4px solid #c29b57; /* Dorado UNAMBA */
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.grid-course-card .course-card-inner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+}
+
+.grid-course-card.split-card .course-card-inner {
+  border-left: 3px solid #ef4444;
+  background-color: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.grid-course-card.split-card .course-card-inner .course-name {
+  color: #991b1b;
+}
+
+.grid-course-card.split-card .course-card-inner .course-group {
+  color: #7f1d1d;
+}
+
+.grid-course-card.split-card .course-card-inner .course-room {
+  color: #b91c1c;
+}

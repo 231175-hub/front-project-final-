@@ -56,7 +56,7 @@ export class ProfileComponent implements OnInit {
 
     me(this.http, urlDinamica).subscribe({
         next: (respuesta) => {
-            const profileData = respuesta.body;
+            const profileData: any = respuesta.body;
             
             if (profileData) {
                 this.usernameLogueado = profileData.full_name || 'Usuario';
@@ -71,13 +71,12 @@ export class ProfileComponent implements OnInit {
                     imageUrl = `${imageUrl}?t=${timestamp}`;
                     this.downloadProfileImage(imageUrl);
                 } else {
-                    this.cdr.detectChanges(); // Refresca si no hay foto
+                    this.cdr.detectChanges();
                 }
             }
         },
         error: async (err) => {
             console.error('Error al llamar a /me en el perfil:', err);
-            // Si falla el backend, usamos el nombre de Keycloak por si acaso
             const profile = await this.keycloakService.loadUserProfile();
             this.usernameLogueado = profile.firstName || 'Usuario';
             this.cdr.detectChanges();
@@ -87,6 +86,7 @@ export class ProfileComponent implements OnInit {
 
   private async downloadProfileImage(imageUrl: string) {
     try {
+      await this.keycloakService.updateToken(20);
       const token = await this.keycloakService.getToken();
       const response = await fetch(imageUrl, {
         method: 'GET',
@@ -96,7 +96,6 @@ export class ProfileComponent implements OnInit {
       if (response.ok) {
         const blob = await response.blob();
         
-        // Liberamos la memoria de la imagen anterior si existe
         if (this.profilePicUrl && this.profilePicUrl.startsWith('blob:')) {
           URL.revokeObjectURL(this.profilePicUrl);
         }
@@ -109,13 +108,11 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  // Se ejecuta cuando el usuario selecciona una imagen
   onFileSelected(event: any) {
     const file: File = event.target.files[0];
     if (file) {
       this.selectedFile = file;
       
-      // Creamos una vista previa (preview) instantánea para que el usuario la vea antes de guardar
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.profilePicUrl = e.target.result;
@@ -130,29 +127,24 @@ export class ProfileComponent implements OnInit {
 
     this.isUploading = true;
 
-    // 1. Preparamos los parámetros según tu patrón
     const bodyParams: Uploadimg$Params = {
       body: {
-        file: this.selectedFile // Aquí pasamos el Blob/File directo
+        file: this.selectedFile 
       }
     };
 
-    // 2. Usamos el api.invoke como en el SchoolInsert
     this.api.invoke(uploadimg, bodyParams).then((response: any) => {
-      // Tu lógica de éxito
       this.messageService.add({ 
         severity: 'success', 
         summary: '¡Éxito!', 
         detail: 'Foto de perfil actualizada correctamente' 
       });
 
-      // Recargamos para refrescar la foto en el menú
       setTimeout(() => {
         window.location.reload();
       }, 1500);
 
     }).catch((error) => {
-      // Tu lógica de error
       this.messageService.add({ 
         severity: 'error', 
         summary: 'Exception', 

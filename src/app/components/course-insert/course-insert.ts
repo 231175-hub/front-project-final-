@@ -3,8 +3,11 @@ import { FormBuilder, FormControl, FormGroup, Validators, ɵInternalFormsSharedM
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { Api } from '../../api/api';
-import { indexschool, indexsemester, registercourse, Registercourse$Params } from '../../api/functions';
+import { indexschool, registercourse, Registercourse$Params } from '../../api/functions';
 import { SelectModule } from 'primeng/select';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { inject } from '@angular/core';
 
 interface Category {
     category: string;
@@ -12,29 +15,29 @@ interface Category {
 
 @Component({
   selector: 'app-course-insert',
-  imports: [ButtonModule, InputTextModule, ɵInternalFormsSharedModule, ReactiveFormsModule, SelectModule],
+  imports: [ButtonModule, InputTextModule, ɵInternalFormsSharedModule, ReactiveFormsModule, SelectModule, ToastModule],
+  providers: [MessageService],
   standalone: true,
   templateUrl: './course-insert.html',
   styleUrl: './course-insert.css',
 })
 export class CourseInsert implements OnInit {
 
+	private messageService = inject(MessageService);
+
 	get codefb() {return this.frmInsertCourse.controls['code']};
 	get creditsfb() {return this.frmInsertCourse.controls['credits']};
 	get nameCoursefb() {return this.frmInsertCourse.controls['nameCourse']};
-	get conceptualWeightfb() {return this.frmInsertCourse.controls['conceptualWeight']};
-	get practicalWeightfb() {return this.frmInsertCourse.controls['practicalWeight']};
-	get attitudinalWeightfb() {return this.frmInsertCourse.controls['attitudinalWeight']};
 	get idSchoolfb() {return this.frmInsertCourse.controls['idSchool']};
-	get idSemesterfb() {return this.frmInsertCourse.controls['idSemester']};
 	get categoryfb() {return this.frmInsertCourse.controls['category']};
 
 	unitQuantity: number = 0;
 	unitRowList: any[] = [];
 	listUnid: any[] = [];
+	unitsTouched: boolean = false;
 
 	listSchool: [] = [];
-	listSemester: [] = [];
+
 
 	categories: Category[] = [];
 
@@ -46,11 +49,7 @@ export class CourseInsert implements OnInit {
 			'credits': ['', [Validators.required]],
 			'nameCourse': ['', [Validators.required]],
 			'category': ['', [Validators.required]],
-			'conceptualWeight': ['', [Validators.required]],
-			'practicalWeight': ['', [Validators.required]],
-			'attitudinalWeight': ['', [Validators.required]],
-			'idSchool': ['', Validators.required],
-			'idSemester': ['', [Validators.required]]
+			'idSchool': ['', Validators.required]
 		});
 	}
 
@@ -62,12 +61,7 @@ export class CourseInsert implements OnInit {
 			this.cdr.detectChanges();
 		});
 
-		this.api.invoke(indexsemester).then((responseSemester: any) => {
-			let apiResponseTempSemester = typeof responseSemester === 'string' ? JSON.parse(responseSemester) : responseSemester;
-			let apiResponseSemester = apiResponseTempSemester.data ? apiResponseTempSemester.data : apiResponseTempSemester;
-			this.listSemester = apiResponseSemester;
-			this.cdr.detectChanges();
-		});
+
 
 		this.categories = [ 
 			{ category: 'AFPO'},
@@ -110,25 +104,52 @@ export class CourseInsert implements OnInit {
 	}
 
 	sendInsertCourse(event: Event) {
+		this.unitsTouched = true;
+		if (this.frmInsertCourse.invalid || this.unitRowList.length === 0) {
+			this.frmInsertCourse.markAllAsTouched();
+			this.messageService.add({
+				severity: 'error',
+				summary: 'Error',
+				detail: 'Complete todos los campos obligatorios y agregue al menos una unidad.',
+				life: 3000
+			});
+			return;
+		}
+
 		const numbers = this.unitRowList.map((item, index) => index + 1);
 
 		const bodyParams: Registercourse$Params = {
 			body: {
 				code: this.codefb.value,
-				credits: this.creditsfb.value,
+				credits: Number(this.creditsfb.value),
 				nameCourse: this.nameCoursefb.value,
 				category: this.categoryfb.value,
-				conceptualWeight: this.conceptualWeightfb.value,
-				practicalWeight: this.practicalWeightfb.value,
-				attitudinalWeight: this.attitudinalWeightfb.value,
 				idSchool: this.idSchoolfb.value,
-				idSemester: this.idSemesterfb.value,
-				units: numbers
+				units: numbers as any
 			}
 		}
 
 		this.api.invoke(registercourse, bodyParams).then((response: any) => {
 			let apiResponse = typeof response === "string" ? JSON.parse(response) : response;
+			this.messageService.add({
+				severity: 'success',
+				summary: 'Éxito',
+				detail: 'Curso registrado correctamente.',
+				life: 3000
+			});
+			this.frmInsertCourse.reset();
+			this.unitRowList = [];
+			this.unitQuantity = 0;
+			this.unitsTouched = false;
+			this.cdr.detectChanges();
+		}).catch((err) => {
+			console.error("Error al registrar el curso:", err);
+			this.messageService.add({
+				severity: 'error',
+				summary: 'Error',
+				detail: 'Ups. Algo salió mal al registrar el curso.',
+				life: 3000
+			});
 		});
 	}
 }

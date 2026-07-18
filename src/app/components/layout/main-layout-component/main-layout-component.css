@@ -1,45 +1,265 @@
-:host ::ng-deep .p-panelmenu {
-    border: none;
+/* Layout Wrapper */
+.layout-wrapper {
+    background-color: #f8fafc;
 }
 
-:host ::ng-deep .p-panelmenu .p-panelmenu-header > a {
-    background: transparent !important;
-    border: none !important;
-    color: var(--text-color) !important;
-    padding: 1rem 1.25rem;
-    font-weight: 600;
-    transition: background-color 0.2s;
+/* Sidebar Container with original UNAMBA Azul */
+.sidebar-container {
+    width: 20rem;
+    flex-shrink: 0;
+    background-color: #1a3b70 !important; /* Azul UNAMBA de antes */
+    color: #f8fafc;
+    border-right: 1px solid #102a52;
+    z-index: 100;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.sidebar-container.collapsed {
+    width: 0 !important;
+    border-right-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.border-slate-800 {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.logo-area {
+    background-color: #122b54 !important; /* Azul más oscuro original */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    transition: background-color 0.3s ease;
+}
+
+.logo-area:hover {
+    background-color: #0c2040 !important; /* Hover original */
+}
+
+.sidebar-icon-box {
+    width: 3rem;
+    height: 3rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
-:host ::ng-deep .p-panelmenu .p-panelmenu-header > a:hover {
-    background-color: var(--surface-hover) !important;
-    color: var(--primary-color) !important;
+.logo-area:hover .sidebar-icon-box {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: scale(1.03);
 }
 
-:host ::ng-deep .p-panelmenu .p-panelmenu-header > a:hover .p-menuitem-icon,
-:host ::ng-deep .p-panelmenu .p-panelmenu-header.p-highlight > a .p-menuitem-icon {
-    color: var(--primary-color) !important;
+/* Welcome Banner (Figma-style) */
+.welcome-banner {
+    background: linear-gradient(135deg, #1a3b70 0%, #1e40af 100%) !important;
+    border-left: 6px solid #c29b57; /* Acento Dorado original */
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
-:host ::ng-deep .p-panelmenu .p-panelmenu-content {
+/* Sidebar dark panelmenu overrides using original UNAMBA Identity with premium styles */
+:host ::ng-deep .dark-panelmenu,
+:host ::ng-deep .dark-panelmenu .p-panelmenu-panel,
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header,
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content {
     background: transparent !important;
     border: none !important;
-    padding: 0.5rem 0;
+    box-shadow: none !important;
 }
 
-:host ::ng-deep .p-panelmenu .p-panelmenu-content .p-menuitem > .p-menuitem-link {
+/* 1. Cabeceras (Headers) */
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header > a {
     background: transparent !important;
-    padding: 0.75rem 1rem 0.75rem 3rem; 
-    border-radius: 6px;
-    margin: 0 0.5rem;
-    transition: all 0.2s;
+    border: none !important;
+    color: #ffffff !important; /* Letras blancas originales */
+    padding: 0.85rem 1.25rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.35rem !important;
+    transition: all 0.25s ease !important;
 }
 
-:host ::ng-deep .p-panelmenu .p-panelmenu-content .p-menuitem > .p-menuitem-link:hover {
-    background-color: var(--surface-hover) !important;
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header > a:hover {
+    background: rgba(255, 255, 255, 0.08) !important; /* Hover sutil con fondo blanco translúcido */
+    color: #ffffff !important;
+    transform: translateX(4px); /* Desplazamiento animado */
 }
 
-:host ::ng-deep .p-button-danger.p-button-text:hover {
-    background-color: rgba(239, 68, 68, 0.1) !important;
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header.p-highlight > a {
+    background: rgba(255, 255, 255, 0.06) !important;
+    color: #ffffff !important;
+    border-left: 3px solid #c29b57 !important; /* Acento dorado indicador de expansión */
+}
+
+/* Iconos de cabecera y flechas de expansión */
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header > a .p-menuitem-icon {
+    color: #ffffff !important; /* Icono blanco original */
+    margin-right: 0.75rem !important;
+    font-size: 1.05rem !important;
+    transition: transform 0.25s ease !important;
+}
+
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header > a .p-panelmenu-icon {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-size: 0.8rem !important;
+    transition: all 0.25s ease !important;
+}
+
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header > a:hover .p-panelmenu-icon,
+:host ::ng-deep .dark-panelmenu .p-panelmenu-header.p-highlight > a .p-panelmenu-icon {
+    color: #ffffff !important;
+    transform: rotate(90deg); /* Animación de rotación de flecha */
+}
+
+/* Contenedor del acordeón expandido */
+:host ::ng-deep .dark-panelmenu .p-toggleable-content {
+    background: rgba(0, 0, 0, 0.12) !important; /* Fondo sutil para agrupar opciones */
+    border-radius: 8px !important;
+    margin-bottom: 0.4rem !important;
+    padding: 0.25rem 0 !important;
+}
+
+/* 2. Contenido interno y Submenús */
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content .p-menuitem-link {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.85) !important; /* Blanco ligeramente suave */
+    padding: 0.65rem 1rem 0.65rem 2.5rem !important; 
+    border-radius: 6px !important;
+    margin: 0.15rem 0.5rem !important;
+    border-left: 3px solid transparent !important;
+    transition: all 0.2s ease !important;
+}
+
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content .p-menuitem-link:hover {
+    background: rgba(255, 255, 255, 0.06) !important; /* Hover traslúcido */
+    color: #ffffff !important; /* Letras blancas */
+    border-left: 3px solid #c29b57 !important; /* Acento dorado del logo */
+    transform: translateX(4px);
+}
+
+/* Soporte para item activo (si aplica clase router-link-active) */
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content .p-menuitem-link.router-link-active,
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content .p-menuitem-link.p-highlight {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    border-left: 3px solid #c29b57 !important;
+    font-weight: 500 !important;
+}
+
+/* Iconos del submenú */
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content .p-menuitem-link .p-menuitem-icon {
+    color: rgba(255, 255, 255, 0.7) !important;
+    margin-right: 0.75rem !important;
+    font-size: 0.9rem !important;
+    transition: color 0.2s ease !important;
+}
+
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content .p-menuitem-link:hover .p-menuitem-icon,
+:host ::ng-deep .dark-panelmenu .p-panelmenu-content .p-menuitem-link.router-link-active .p-menuitem-icon {
+    color: #ffffff !important;
+}
+
+/* Header Topbar */
+.topbar {
+    border-bottom: 1px solid #e2e8f0;
+    height: 4.5rem;
+}
+
+.text-slate-800 {
+    color: #1e293b !important;
+}
+
+.text-slate-700 {
+    color: #334155 !important;
+}
+
+.text-slate-400 {
+    color: #94a3b8 !important;
+}
+
+.text-slate-300 {
+    color: #cbd5e1 !important;
+}
+
+.text-slate-300:hover {
+    color: #ffffff !important;
+}
+
+/* Footer Styles */
+.app-footer {
+    width: 100%;
+}
+
+.app-footer.home-footer {
+    margin-top: -120px;
+    position: relative;
+    z-index: 10;
+}
+
+.footer-content {
+    background-color: #122b54; /* Fondo Azul UNAMBA */
+    color: #ffffff;
+}
+
+.sidebar-container .p-button-text {
+    border-radius: 8px !important;
+    margin: 0.5rem !important;
+    padding: 0.75rem 1rem !important;
+    transition: all 0.25s ease !important;
+}
+
+.sidebar-container .p-button-text:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: translateY(-2px);
+}
+
+.main-container {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.content-wrapper {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+    padding-bottom: 24px !important;
+}
+
+/* Mobile Sidebar & Overlay styling */
+.mobile-sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+    transition: opacity 0.25s ease;
+}
+
+.mobile-sidebar {
+    position: fixed;
+    top: 0;
+    left: -20rem;
+    width: 20rem;
+    height: 100vh;
+    background-color: #1a3b70 !important; /* Azul original */
+    z-index: 1000;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow-y: auto;
+}
+
+.mobile-sidebar.active {
+    left: 0;
+}
+
+@media (max-width: 576px) {
+    ::ng-deep .btn-logout-resp .p-button-label {
+        display: none !important;
+    }
 }

@@ -3,6 +3,7 @@ import { Api } from '../../../api/api';
 import { ActivatedRoute } from '@angular/router';
 import { registeracademicperiod, Registeracademicperiod$Params, showacademicperiod, updateacademicperiod, Updateacademicperiod$Params } from '../../../api/functions';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { confirmAction } from '../../../core/utils/confirm.helper';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
@@ -43,7 +44,7 @@ export class AcademicPeriodUpdate implements OnInit{
 
   constructor(private api: Api, private route: ActivatedRoute, private formBuilder: FormBuilder) {
     this.frmUpdateAcademicPeriod = this.formBuilder.group({
-      'yearPeriod': ['', [Validators.required]],
+      'yearPeriod': ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]],
       'numberPeriod': ['', [Validators.required]],
       'startDate': [null, Validators.required],
       'endDate': [null, [Validators.required]],
@@ -93,42 +94,34 @@ export class AcademicPeriodUpdate implements OnInit{
         return
       }
   
-      this.confirmationService.confirm({
-        target: event.target as EventTarget,
-        message: '¿Desea ingresar esta escuela?',
-        header: 'Confirmación',
-        icon: 'pi-pi-info-circle',
-        rejectLabel: 'Cancel',
-        rejectButtonProps: {
-          label: 'Cancelar',
-          severity: 'secondary',
-          outlined: true
-        },
-        acceptButtonProps:{
-          label: 'Aceptar',
-          severity: 'primary'
-        },
-  
-        accept: () => {
-          const bodyParams: Updateacademicperiod$Params = {
-            idPeriod: this.idAcademicPeriod,
-            body: {
-              'yearPeriod': this.yearPeriodfb.value,
-              'numberPeriod': this.numberPeriodfb.value,
-              'startDate': this.startDatefb.value,
-              'endDate': this.endDatefb.value,
-              'status': this.statusfb.value,
+      confirmAction(this.confirmationService, event, '¿Desea ingresar esta escuela?', () => {
+        const bodyParams: Updateacademicperiod$Params = {
+          idPeriod: this.idAcademicPeriod,
+          body: {
+            'yearPeriod': this.yearPeriodfb.value,
+            'numberPeriod': this.numberPeriodfb.value,
+            'startDate': this.startDatefb.value,
+            'endDate': this.endDatefb.value,
+            'status': this.statusfb.value,
+          }
+        }
+
+        this.api.invoke(updateacademicperiod, bodyParams).then((response: any) => {
+          const updateAcademicPeriod = typeof response === 'string' ? JSON.parse(response): response;
+          this.frmUpdateAcademicPeriod.reset();
+        }).catch((error) => {
+          console.error("Error al actualizar periodo académico:", error);
+          let detailMsg = 'Ya existe un semestre activo o el periodo académico ya se encuentra registrado.';
+          if (error?.error?.listMessage && error.error.listMessage.length > 0) {
+            detailMsg = error.error.listMessage.join(', ');
+          } else {
+            const errorMsg = error?.error?.message || error?.message || '';
+            if (errorMsg && !errorMsg.includes('Http failure response') && !errorMsg.includes('500')) {
+              detailMsg = errorMsg;
             }
           }
-  
-          this.api.invoke(updateacademicperiod, bodyParams).then((response: any) => {
-            const updateAcademicPeriod = typeof response === 'string' ? JSON.parse(response): response;
-            this.frmUpdateAcademicPeriod.reset();
-          }).catch((error) => {
-            this.messageService.add({ severity: 'error', summary: 'Exception', detail: 'Ups. Algo salio mal' + error});
-          });
-        },
-        reject: () => {}
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: detailMsg, life: 5000 });
+        });
       });
     }
 }

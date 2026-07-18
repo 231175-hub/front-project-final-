@@ -11,6 +11,8 @@ export type { Deleteacademicperiod$Params as Deleteacademicperiod$Params } from 
 export { deleteacademicperiod as deleteacademicperiod } from './fn/academic-period/deleteacademicperiod';
 export type { Updateacademicperiod$Params as Updateacademicperiod$Params } from './fn/academic-period/updateacademicperiod';
 export { updateacademicperiod as updateacademicperiod } from './fn/academic-period/updateacademicperiod';
+export type { Getacademicperiodstatuses$Params as Getacademicperiodstatuses$Params } from './fn/academic-period/getacademicperiodstatuses';
+export { getacademicperiodstatuses as getacademicperiodstatuses } from './fn/academic-period/getacademicperiodstatuses';
 export type { Registercourse$Params as Registercourse$Params } from './fn/course/registercourse';
 export { registercourse as registercourse } from './fn/course/registercourse';
 export type { Indexcourse$Params as Indexcourse$Params } from './fn/course/indexcourse';
@@ -101,16 +103,6 @@ export type { Updateschool$Params as Updateschool$Params } from './fn/school/upd
 export { updateschool as updateschool } from './fn/school/updateschool';
 export type { Registerschoolfile$Params as Registerschoolfile$Params } from './fn/school-file/registerschoolfile';
 export { registerschoolfile as registerschoolfile } from './fn/school-file/registerschoolfile';
-export type { Registersemester$Params as Registersemester$Params } from './fn/semester/registersemester';
-export { registersemester as registersemester } from './fn/semester/registersemester';
-export type { Indexsemester$Params as Indexsemester$Params } from './fn/semester/indexsemester';
-export { indexsemester as indexsemester } from './fn/semester/indexsemester';
-export type { Showsemester$Params as Showsemester$Params } from './fn/semester/showsemester';
-export { showsemester as showsemester } from './fn/semester/showsemester';
-export type { Deletesemester$Params as Deletesemester$Params } from './fn/semester/deletesemester';
-export { deletesemester as deletesemester } from './fn/semester/deletesemester';
-export type { Updatesemester$Params as Updatesemester$Params } from './fn/semester/updatesemester';
-export { updatesemester as updatesemester } from './fn/semester/updatesemester';
 export type { Registerstudent$Params as Registerstudent$Params } from './fn/student/registerstudent';
 export { registerstudent as registerstudent } from './fn/student/registerstudent';
 export type { Indexstudent$Params as Indexstudent$Params } from './fn/student/indexstudent';

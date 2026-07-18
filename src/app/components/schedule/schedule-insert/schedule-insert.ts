@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { Api } from '../../../api/api';
 // IMPORTANTE: Asegúrate de importar la función para buscar profesores (ej. searchprofessor)
 import { getunassignedstudents, indexschool, registerschedule, Registerschedule$Params, searchcourse, getgroupwithcourse, searchproffesor } from '../../../api/functions';
@@ -7,6 +7,11 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { confirmAction } from '../../../core/utils/confirm.helper';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { NgClass } from '@angular/common';
 
 interface Day {
   name: string;
@@ -14,12 +19,18 @@ interface Day {
 
 @Component({
   selector: 'app-schedule-insert',
-  imports: [ ButtonModule, InputTextModule, SelectModule, AutoCompleteModule, FormsModule, ReactiveFormsModule ],
+  imports: [ ButtonModule, InputTextModule, SelectModule, AutoCompleteModule, FormsModule, ReactiveFormsModule, ToastModule, ConfirmDialogModule, NgClass ],
+  providers: [MessageService, ConfirmationService],
   standalone: true,
   templateUrl: './schedule-insert.html',
   styleUrl: './schedule-insert.css',
 })
 export class ScheduleInsert implements OnInit {
+  get idSchoolfb() { return this.frmGroupAssignment.controls['idSchool']; }
+
+  private messageService = inject(MessageService);
+  private confirmationService = inject(ConfirmationService);
+
   frmGroupAssignment: FormGroup;
   coursesList: any[] = []; 
   listSchool: any[] = [];
@@ -145,6 +156,19 @@ export class ScheduleInsert implements OnInit {
   }
 
   sendInsertSchedule(event: Event): void {
+    if (!this.frmGroupAssignment.valid) {
+      this.frmGroupAssignment.markAllAsTouched();
+      this.frmGroupAssignment.markAllAsDirty();
+      
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Complete todos los campos obligatorios (Escuela).',
+        life: 3000
+      });
+      return;
+    }
+
     let payload: any[] = [];
 
     this.coursesList.forEach(course => {
@@ -152,29 +176,62 @@ export class ScheduleInsert implements OnInit {
         if (group.idGroupSelected && group.schedules.length > 0) {
           payload.push({
             idGroup: group.idGroupSelected,
-            // Extraemos el ID del profesor seleccionado
             idProfessor: group.professorObject ? group.professorObject.idProfessor : null, 
             schedules: group.schedules.map((sched: any) => ({
               dayWeek: sched.dayWeek,
               startTime: sched.startTime,
               endTime: sched.endTime,
-              classroom: sched.classroom // O "environment"
+              classroom: sched.classroom 
             }))
           });
         }
       });
     });
 
-    console.log("Enviando JSON:", payload);
+    if (payload.length === 0) {
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: 'Error', 
+        detail: 'Debe registrar al menos un curso con sección y bloque horario.',
+        life: 3000
+      });
+      return;
+    }
 
-    const bodyParams: Registerschedule$Params = {
-      body: payload
-    };
+    confirmAction(this.confirmationService, event, '¿Desea registrar los horarios asignados?', () => {
+      const bodyParams: Registerschedule$Params = {
+        body: payload
+      };
 
-    this.api.invoke(registerschedule, bodyParams).then((response: any) => {
-      let apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
-      console.log('Respuesta del registro:', apiResponse);
-      alert("¡Horario y docente registrados correctamente!");
+      this.api.invoke(registerschedule, bodyParams).then((response: any) => {
+        const apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
+        if (apiResponse && apiResponse.type === 'error') {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error al registrar el horario.',
+            life: 3000
+          });
+        } else {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Horarios y docentes registrados correctamente.',
+            life: 3000
+          });
+          this.coursesList = [];
+          this.frmGroupAssignment.reset();
+        }
+        this.cdr.detectChanges();
+      }).catch((error) => {
+        console.error("Error al registrar horario:", error);
+        const errorMsg = error?.error?.message || error?.message || '';
+        let detailMsg = 'Error al registrar el horario.';
+        if (errorMsg && !errorMsg.includes('Http failure response') && !errorMsg.includes('500')) {
+          detailMsg = errorMsg;
+        }
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: detailMsg, life: 5000 });
+      });
     });
   }
 }

@@ -1,32 +1,39 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ButtonModule } from 'primeng/button';
 import { KeycloakService } from 'keycloak-angular';
 import { Api } from '../../../api/api';
-
-import { reportcardstudent, exportscorepdf, exportrecordpdf } from '../../../api/functions'; 
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { ChartModule } from 'primeng/chart';
+import { reportcardstudent } from '../../../api/functions'; 
 
 @Component({
   selector: 'app-report-card',
-  imports: [CommonModule, ButtonModule],
   standalone: true,
+  imports: [CommonModule, ButtonModule, ToastModule, ChartModule],
   templateUrl: './report-card.html',
   styleUrl: './report-card.css',
+  providers: [MessageService]
 })
 export class ReportCard implements OnInit {
-  public boletas: any[] = [];
-  
-  public loading: boolean = true;
-  public errorMensaje: string | null = null;
+  public reportCards = signal<any[]>([]);
+  public loading = signal<boolean>(true);
+  public errorMessage = signal<string | null>(null);
 
-  public isDownloadingConstancia: boolean = false;
-  public isDownloadingHistorial: boolean = false;
+  public isDownloadingCertificate = signal<boolean>(false);
+  public isDownloadingAcademicHistory = signal<boolean>(false);
 
-  constructor(
-    private keycloakService: KeycloakService,
-    private api: Api,
-    private cdr: ChangeDetectorRef
-  ) {}
+  public chartData = signal<any>(null);
+  public chartOptions = signal<any>(null);
+
+  private keycloakService = inject(KeycloakService);
+  private api = inject(Api);
+  private messageService = inject(MessageService);
+  private http = inject(HttpClient);
+
+  constructor() {}
 
   async ngOnInit() {
     if (await this.keycloakService.isLoggedIn()) {
@@ -38,9 +45,8 @@ export class ReportCard implements OnInit {
           this.loadReportCards(idStudentKeycloak);
         }
       } catch (err) {
-        console.error('Error al obtener perfil de Keycloak', err);
-        this.loading = false;
-        this.cdr.detectChanges();
+        console.error('Error getting user profile', err);
+        this.loading.set(false);
       }
     }
   }
@@ -52,7 +58,7 @@ export class ReportCard implements OnInit {
       if (apiResponseTemp.success) {
         let apiResponse = apiResponseTemp.data ? apiResponseTemp.data : apiResponseTemp;
         
-        this.boletas = apiResponse.map((boleta: any) => {
+        const mapped = apiResponse.map((boleta: any) => {
           const unidades = [];
           
           for (let i = 1; i <= 5; i++) {
@@ -73,86 +79,148 @@ export class ReportCard implements OnInit {
           return boleta;
         });
 
+        this.reportCards.set(mapped);
+        this.generateChartData(mapped);
       } else {
-        this.errorMensaje = apiResponseTemp.message || apiResponseTemp.error;
+        this.errorMessage.set(apiResponseTemp.message || apiResponseTemp.error);
       }
 
-      this.loading = false;
-      this.cdr.detectChanges(); 
-
+      this.loading.set(false);
     }).catch((error) => {
-      console.error("Error al conectar con la API de notas:", error);
-      this.errorMensaje = "Error de conexión con el servidor.";
-      this.loading = false;
-      this.cdr.detectChanges();
+      console.error("Error connecting to report card API:", error);
+      this.errorMessage.set("Error de conexión con el servidor.");
+      this.loading.set(false);
     });
   }
 
-  async previewCertificate(): Promise<void> {
-    this.isDownloadingConstancia = true;
-    this.cdr.detectChanges();
+  generateChartData(mapped: any[]): void {
+    if (!mapped || mapped.length === 0) return;
+    const courseNames = mapped.map((b: any) => b.nombreCurso);
+    const finalGrades = mapped.map((b: any) => {
+      const val = Number(b.promedioGeneral);
+      return isNaN(val) ? 0 : val;
+    });
 
-    try {
-      const token = await this.keycloakService.getToken();
-
-      const response = await fetch('http://localhost:8081/intranet/downloadscorepdf', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
+    this.chartData.set({
+      labels: courseNames,
+      datasets: [
+        {
+          label: 'Promedio Final del Curso',
+          data: finalGrades,
+          backgroundColor: 'rgba(2, 132, 199, 0.2)',
+          borderColor: '#0284c7',
+          pointBackgroundColor: '#0284c7',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: '#0284c7',
+          fill: true
         }
-      });
+      ]
+    });
 
-      if (!response.ok) {
-        throw new Error('El servidor falló al generar la constancia');
+    this.chartOptions.set({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            color: '#4b5563',
+            font: {
+              weight: '600'
+            }
+          }
+        }
+      },
+      scales: {
+        r: {
+          angleLines: {
+            display: true,
+            color: 'rgba(0, 0, 0, 0.1)'
+          },
+          suggestedMin: 0,
+          suggestedMax: 20,
+          ticks: {
+            stepSize: 4,
+            color: '#4b5563'
+          },
+          pointLabels: {
+            color: '#1f2937',
+            font: {
+              size: 11,
+              weight: 'bold'
+            }
+          }
+        }
       }
-
-      const pdfBlob = await response.blob();
-      const fileUrl = window.URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
-      
-      window.open(fileUrl, '_blank');
-      
-      setTimeout(() => window.URL.revokeObjectURL(fileUrl), 1000);
-
-    } catch (error) {
-      console.error('Error maestro abriendo la constancia:', error);
-      alert('Hubo un error al generar la Constancia de Matrícula.');
-    } finally {
-      this.isDownloadingConstancia = false;
-      this.cdr.detectChanges();
-    }
+    });
   }
 
-  async previewHistory(): Promise<void> {
-    this.isDownloadingHistorial = true;
-    this.cdr.detectChanges();
+  previewCertificate(): void {
+    this.isDownloadingCertificate.set(true);
+    this.messageService.add({ 
+      severity: 'info', 
+      summary: 'Generando', 
+      detail: 'Preparando tu Constancia de Matrícula, un momento por favor...' 
+    });
 
-    try {
-      const token = await this.keycloakService.getToken();
-      
-      const response = await fetch('http://localhost:8081/intranet/downloadrecordpdf', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('El servidor falló al generar el historial');
+    this.http.get(`${this.api.rootUrl}/intranet/downloadscorepdf`, {
+      responseType: 'blob'
+    }).subscribe({
+      next: (pdfBlob: Blob) => {
+        const fileUrl = window.URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
+        window.open(fileUrl, '_blank');
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: '¡Listo!', 
+          detail: 'Constancia de Matrícula generada con éxito.' 
+        });
+        setTimeout(() => window.URL.revokeObjectURL(fileUrl), 1000);
+        this.isDownloadingCertificate.set(false);
+      },
+      error: (err) => {
+        console.error('Error downloading certificate:', err);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Hubo un error al generar la Constancia de Matrícula.' 
+        });
+        this.isDownloadingCertificate.set(false);
       }
+    });
+  }
 
-      const pdfBlob = await response.blob();
-      const fileUrl = window.URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
-      
-      window.open(fileUrl, '_blank');
-      
-      setTimeout(() => window.URL.revokeObjectURL(fileUrl), 1000);
+  previewHistory(): void {
+    this.isDownloadingAcademicHistory.set(true);
+    this.messageService.add({ 
+      severity: 'info', 
+      summary: 'Generando', 
+      detail: 'Preparando tu Historial Académico, un momento por favor...' 
+    });
 
-    } catch (error) {
-      console.error('Error maestro abriendo el historial:', error);
-      alert('Hubo un error al generar el Historial Académico.');
-    } finally {
-      this.isDownloadingHistorial = false;
-      this.cdr.detectChanges();
-    }
+    this.http.get(`${this.api.rootUrl}/intranet/downloadrecordpdf`, {
+      responseType: 'blob'
+    }).subscribe({
+      next: (pdfBlob: Blob) => {
+        const fileUrl = window.URL.createObjectURL(new Blob([pdfBlob], { type: 'application/pdf' }));
+        window.open(fileUrl, '_blank');
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: '¡Listo!', 
+          detail: 'Historial Académico generado con éxito.' 
+        });
+        setTimeout(() => window.URL.revokeObjectURL(fileUrl), 1000);
+        this.isDownloadingAcademicHistory.set(false);
+      },
+      error: (err) => {
+        console.error('Error downloading academic history:', err);
+        this.messageService.add({ 
+          severity: 'error', 
+          summary: 'Error', 
+          detail: 'Hubo un error al generar el Historial Académico.' 
+        });
+        this.isDownloadingAcademicHistory.set(false);
+      }
+    });
   }
 }

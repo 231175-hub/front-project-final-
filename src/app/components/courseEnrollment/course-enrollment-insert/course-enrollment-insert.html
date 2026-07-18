@@ -1,76 +1,126 @@
-<div>
-    <form [formGroup]="frmCourseEnrollmentInsert">
-        <p-select [options]="listSchool" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" class="w-full" />
+<div class="flex justify-content-center my-6 px-3">
+  <div class="surface-card border-1 surface-border shadow-2 border-round-2xl overflow-hidden w-full" style="max-width: 800px;">
+    <!-- Header Banner -->
+    <div class="px-5 py-4 text-white flex justify-content-between align-items-center border-bottom-1 surface-border" style="background: linear-gradient(135deg, #1e3a8a, #0f172a);">
+      <div>
+        <h2 class="text-xl font-bold text-white m-0">Matricular en Curso</h2>
+        <p class="text-xs text-blue-100 mt-1 m-0">Seleccione la escuela, el estudiante y agregue los cursos correspondientes.</p>
+      </div>
+      <i class="pi pi-check-square text-2xl text-blue-200"></i>
+    </div>
 
-        <div class="field">
-            <label for="alumno" class="font-bold block mb-2">Buscar Alumno</label>
-            <p-autoComplete 
-                inputId="alumno"
-                formControlName="idStudent"
-                [suggestions]="studentSuggestion" 
-                (completeMethod)="searchStudent($event)" 
-                optionLabel="fullName" 
-                dataKey="idStudent" 
-                [delay]="300" 
-                placeholder="Escribe el nombre o Código..."
-                [dropdown]="false"
-                styleClass="w-full">
-                
-                <ng-template let-alumno pTemplate="item">
-                    <div class="flex align-items-center">
-                        <span class="font-bold text-gray-800">{{ alumno.fullName }}</span>
-                        <span class="ml-2 text-gray-500 text-sm"> (Código: {{ alumno.code }})</span>
-                    </div>
-                </ng-template>
-            </p-autoComplete>
-        </div>
-    </form>
-    <div class="flex flex-col gap-2">
-        <div class="flex items-center gap-4 mb-2">
-            <p-button label="Matricular Estudiantes" styleClass="bg-black hover:bg-gray-800 border-black text-white rounded-full px-4" (click)="addCourse()" />
-            <span class="text-red-300 font-semibold text-sm">Ingrese los cursos a matricular</span>
+    <form [formGroup]="frmCourseEnrollmentInsert" class="p-5 flex flex-column gap-4">
+      <div class="grid">
+        
+        <!-- Escuela -->
+        <div class="col-12 flex flex-column gap-2">
+          <label for="escuela" class="text-sm font-semibold text-700">
+            Escuela <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-select [options]="listSchool" id="escuela" formControlName="idSchool" [filter]="true" optionValue="idSchool" optionLabel="nameSchool" placeholder="Seleccione una escuela" appendTo="body" class="w-full" styleClass="w-full" />
+          @if ((idSchoolfb.touched || idSchoolfb.dirty) && idSchoolfb.errors && idSchoolfb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
         </div>
 
-        <div class="border rounded-md overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead class="border-b bg-gray-50">
+        <!-- Buscar Alumno -->
+        <div class="col-12 flex flex-column gap-2 mt-2">
+          <label for="alumno" class="text-sm font-semibold text-700">
+            Buscar Alumno <span class="text-red-500 font-bold">*</span>
+          </label>
+          <p-autoComplete 
+              inputId="alumno"
+              formControlName="idStudent"
+              [suggestions]="studentSuggestion" 
+              (completeMethod)="searchStudent($event)" 
+              optionLabel="fullName" 
+              dataKey="idStudent" 
+              [delay]="300" 
+              placeholder="Escribe el nombre o Código..."
+              [dropdown]="false"
+              styleClass="w-full"
+              class="w-full">
+              
+              <ng-template let-alumno pTemplate="item">
+                  <div class="flex align-items-center">
+                      <span class="font-bold text-gray-800">{{ alumno.fullName }}</span>
+                      <span class="ml-2 text-gray-500 text-sm"> (Código: {{ alumno.code }})</span>
+                  </div>
+              </ng-template>
+          </p-autoComplete>
+          @if ((idStudentfb.touched || idStudentfb.dirty) && idStudentfb.errors && idStudentfb.hasError('required')) {
+            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          }
+        </div>
+
+      </div>
+
+      <!-- Cursos a Matricular Section -->
+      <div class="flex flex-column gap-3 mt-3">
+        <div class="flex align-items-center justify-content-between">
+          <div class="flex align-items-center gap-3">
+            <p-button label="Agregar Curso" icon="pi pi-plus" styleClass="p-button-outlined p-button-sm" (click)="addCourse()" />
+            @if (courseRowList.length === 0) {
+              <span class="text-orange-500 font-semibold text-sm">Ingrese los cursos a matricular</span>
+            }
+          </div>
+        </div>
+
+        @if (courseRowList.length > 0) {
+          <div class="border-1 surface-border border-round-lg overflow-hidden">
+            <table class="w-full text-left border-collapse" style="width: 100%;">
+                <thead class="bg-light border-bottom surface-border">
                     <tr>
-                        <th class="p-3 text-sm font-bold text-gray-800 text-center">Descripción</th>
-                        <th class="p-3 text-sm font-bold text-gray-800 text-center w-32">ACCIONES</th>
+                        <th class="p-3 text-sm font-bold text-800 text-center" style="width: 75%;">Descripción del Curso</th>
+                        <th class="p-3 text-sm font-bold text-800 text-center" style="width: 25%;">ACCIONES</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for(value of courseRowList; track $index) {
-                        <tr class="border-b last:border-none">
-                            <td class="p-2 text-center">
-                                <div class="card flex justify-center">
-                                    <div class="field">
-                                        <label class="font-bold block mb-2">Buscar Curso</label>
-                                        <p-autoComplete 
-                                            formControlName="courseObject"
-                                            [suggestions]="courseSuggestions" 
-                                            (completeMethod)="searchCourse($event)" 
-                                            optionLabel="nameCourse" 
-                                            dataKey="idCourse" 
-                                            [delay]="300" 
-                                            placeholder="Escribe el nombre del curso..."
-                                            [dropdown]="false"
-                                            styleClass="w-full">
-                                        </p-autoComplete>
-                                    </div>
-                                </div>
+                        <tr class="border-bottom last:border-none surface-border">
+                            <td class="p-3">
+                                <p-autoComplete 
+                                    [(ngModel)]="value.idCourseSelected"
+                                    [ngModelOptions]="{standalone: true}"
+                                    [suggestions]="courseSuggestions" 
+                                    (completeMethod)="searchCourse($event)" 
+                                    optionLabel="nameCourse" 
+                                    dataKey="idCourse" 
+                                    [delay]="300" 
+                                    placeholder="Escribe el nombre del curso..."
+                                    [dropdown]="false"
+                                    styleClass="w-full"
+                                    class="w-full">
+                                </p-autoComplete>
                             </td>
-                            <td class="p-2 text-center">
-                                <p-button label="Retirar" severity="danger" styleClass="bg-orange-500 hove:bg-orange-600 border-orange-600 text-white rounded-full p-button-sm px-4" (click)="removeCourse(value)" />
+                            <td class="p-3 text-center">
+                                <p-button icon="pi pi-trash" severity="danger" [outlined]="true" (click)="removeCourse(value)" />
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
-        </div>
-    </div>
-</div>
+          </div>
+        }
+      </div>
 
-<div class="flex justify-end border-t pt-4 mt-2">
-    <p-button label="Registrar datos" (click)="sendInsertEnrollment($event)" severity="info" styleClass="rounded-full px-6" />
+      <!-- Footer Buttons and Dialogs -->
+      <div class="flex justify-content-end pt-4 border-top-1 surface-border align-items-center gap-3">
+        <p-toast />
+        <p-confirmdialog>
+            <ng-template #message let-message>
+                @if (message) {
+                    <div class="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border p-4">
+                        <i [ngClass]="message.icon" class="text-5xl text-primary"></i>
+                        <p class="text-base text-700 m-0">{{ message.message }}</p>
+                    </div>
+                }
+            </ng-template>
+        </p-confirmdialog>
+        
+        <p-button (click)="sendInsertEnrollment($event)" icon="pi pi-save" label="Registrar datos" styleClass="px-4 border-round-lg" />
+      </div>
+
+    </form>
+  </div>
 </div>

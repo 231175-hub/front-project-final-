@@ -9,11 +9,15 @@ import { RequestBuilder } from '../../request-builder';
 
 
 export interface Registerschoolfile$Params {
+      body?: {
+'file'?: Blob;
+}
 }
 
 export function registerschoolfile(http: HttpClient, rootUrl: string, params?: Registerschoolfile$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
   const rb = new RequestBuilder(rootUrl, registerschoolfile.PATH, 'post');
   if (params) {
+    rb.body(params.body, 'multipart/form-data');
   }
 
   return http.request(

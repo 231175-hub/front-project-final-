@@ -9,7 +9,7 @@ import { RequestBuilder } from '../../request-builder';
 
 
 export interface Uploadimg$Params {
-  body?: {
+      body?: {
 'file'?: Blob;
 }
 }

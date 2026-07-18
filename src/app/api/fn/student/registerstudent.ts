@@ -11,7 +11,6 @@ import { RequestBuilder } from '../../request-builder';
 export interface Registerstudent$Params {
       body?: {
 'code'?: string;
-'currentSemester'?: number;
 'email'?: string;
 'firstName'?: string;
 'idSchool'?: string;

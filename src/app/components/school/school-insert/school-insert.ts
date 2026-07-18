@@ -9,6 +9,7 @@ import { Api } from '../../../api/api';
 
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { confirmAction } from '../../../core/utils/confirm.helper';
 import { ButtonModule } from 'primeng/button';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 
@@ -53,42 +54,24 @@ export class SchoolInsert{
       return
     }
 
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: '¿Desea ingresar esta escuela?',
-      header: 'Confirmación',
-      icon: 'pi-pi-info-circle',
-      rejectLabel: 'Cancel',
-      rejectButtonProps: {
-        label: 'Cancelar',
-        severity: 'secondary',
-        outlined: true
-      },
-      acceptButtonProps:{
-        label: 'Aceptar',
-        severity: 'primary'
-      },
+    confirmAction(this.confirmationService, event, '¿Desea ingresar esta escuela?', () => {
+      const bodyParams: Registerschool$Params = {
+        body: {
+          nameSchool: this.nameSchoolfb.value,
+          file: this.imageSchoolfb.value
+        }
+      };
 
-      accept: () => {
-        const bodyParams: Registerschool$Params = {
-          body: {
-            nameSchool: this.nameSchoolfb.value,
-            file: this.imageSchoolfb.value
-          }
-        };
-
-        this.api.invoke(registerschool, bodyParams).then((response: any) => {
-          const registerSchool = typeof response === 'string' ? JSON.parse(response) : response;
-          this.frmInsertSchool.reset();
-          this.frmInsertSchool.get('imageSchool')?.setValue(null);
-          if (this.fileUploadComponent) {
-            this.fileUploadComponent.clear();
-          }
-        }).catch((error) => {
-          this.messageService.add({ severity: 'error', summary: 'Exception', detail: 'Ups. Algo salio mal' + error});
-        });
-      },
-      reject: () => {}
+      this.api.invoke(registerschool, bodyParams).then((response: any) => {
+        const registerSchool = typeof response === 'string' ? JSON.parse(response) : response;
+        this.frmInsertSchool.reset();
+        this.frmInsertSchool.get('imageSchool')?.setValue(null);
+        if (this.fileUploadComponent) {
+          this.fileUploadComponent.clear();
+        }
+      }).catch((error) => {
+        this.messageService.add({ severity: 'error', summary: 'Exception', detail: 'Ups. Algo salio mal' + error});
+      });
     });
   }
 

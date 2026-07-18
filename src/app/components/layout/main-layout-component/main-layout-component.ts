@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { MegaMenuItem, MenuItem } from 'primeng/api';
 import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
@@ -7,17 +7,27 @@ import { MegaMenuModule } from 'primeng/megamenu';
 import { RippleModule } from 'primeng/ripple';
 import { BadgeModule } from 'primeng/badge';
 import { PanelMenuModule } from 'primeng/panelmenu';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 
-// TUS NUEVAS IMPORTACIONES
 import { HttpClient } from '@angular/common/http';
 import { ApiConfiguration } from '../../../api/api-configuration';
 import { me } from '../../../api/fn/me/me';
+import { InteractiveSliderComponent } from '../interactive-slider/interactive-slider.component';
 
 @Component({
     selector: 'app-main-layout-component',
-    imports: [AvatarModule, ButtonModule, MegaMenuModule, RippleModule, CommonModule, RouterModule, BadgeModule, PanelMenuModule],
+    imports: [
+        AvatarModule, 
+        ButtonModule, 
+        MegaMenuModule, 
+        RippleModule, 
+        CommonModule, 
+        RouterModule, 
+        BadgeModule, 
+        PanelMenuModule,
+        InteractiveSliderComponent
+    ],
     templateUrl: './main-layout-component.html',
     styleUrl: './main-layout-component.css',
     standalone: true
@@ -27,34 +37,68 @@ export class MainLayoutComponent implements OnInit {
     itemsMega: MegaMenuItem[] | undefined;
     itemsMenu: MenuItem[] = [];
     
-    public usernameLogueado: string = 'Usuario';
-    public profilePicUrl: string = '/default-avatar.png'; // Imagen por defecto
+    public loggedInUsername = signal<string>('Usuario');
+    public profilePicUrl = signal<string>('/default-avatar.png'); 
+    public mobileMenuVisible = signal<boolean>(false);
+    public sidebarCollapsed = signal<boolean>(false);
+    public isDarkMode = signal<boolean>(false);
 
-    public isAdmin: boolean = false;
-    public isProfessor: boolean = false;
-    public isStudent: boolean = false;
+    public toggleMobileMenu() {
+        this.mobileMenuVisible.set(!this.mobileMenuVisible());
+    }
 
-    // INYECCIÓN DE TUS SERVICIOS
+    public toggleSidebar() {
+        this.sidebarCollapsed.set(!this.sidebarCollapsed());
+    }
+
+    public toggleDarkMode() {
+        const element = document.querySelector('html');
+        if (element) {
+            if (element.classList.contains('my-app-dark')) {
+                element.classList.remove('my-app-dark');
+                this.isDarkMode.set(false);
+                localStorage.setItem('dark-mode', 'false');
+            } else {
+                element.classList.add('my-app-dark');
+                this.isDarkMode.set(true);
+                localStorage.setItem('dark-mode', 'true');
+            }
+        }
+    }
+
+    public isAdmin = signal<boolean>(false);
+    public isProfessor = signal<boolean>(false);
+    public isStudent = signal<boolean>(false);
+
     private http = inject(HttpClient);
     private apiConfig = inject(ApiConfiguration);
+    private keycloakService = inject(KeycloakService);
+    private router = inject(Router);
 
-    constructor(
-        private keycloakService: KeycloakService,
-        private cdr: ChangeDetectorRef,
-        private router: Router
-    ) {}
+    constructor() {
+        this.router.events.subscribe(event => {
+            if (event instanceof NavigationEnd) {
+                this.mobileMenuVisible.set(false);
+            }
+        });
+    }
 
     async ngOnInit() {
+        const isDark = localStorage.getItem('dark-mode') === 'true';
+        if (isDark) {
+            document.querySelector('html')?.classList.add('my-app-dark');
+            this.isDarkMode.set(true);
+        }
+
         if (await this.keycloakService.isLoggedIn()) {
             try {
                 const roles = this.keycloakService.getUserRoles();
-                this.isAdmin = roles.includes('ADMIN');
-                this.isProfessor = roles.includes('PROFESSOR');
-                this.isStudent = roles.includes('STUDENT');
+                this.isAdmin.set(roles.includes('ADMIN'));
+                this.isProfessor.set(roles.includes('PROFESSOR'));
+                this.isStudent.set(roles.includes('STUDENT'));
 
                 this.buildNavigationMenus();
                 
-                // Llamamos a tu función personalizada
                 this.loadMyProfile();
 
             } catch (error) {
@@ -68,11 +112,10 @@ export class MainLayoutComponent implements OnInit {
 
         me(this.http, urlDinamica).subscribe({
             next: (respuesta) => {
-                const profileData = respuesta.body;
+                const profileData: any = respuesta.body;
                 
                 if (profileData) {
-                    this.usernameLogueado = profileData.full_name || 'Usuario';
-                    this.cdr.detectChanges();
+                    this.loggedInUsername.set(profileData.full_name || 'Usuario');
 
                     if (profileData.url_image) {
                         const timestamp = new Date().getTime();
@@ -82,20 +125,16 @@ export class MainLayoutComponent implements OnInit {
                         }
                         imageUrl = `${imageUrl}?t=${timestamp}`;
                         this.downloadProfileImage(imageUrl);
-                    } else {
-                        this.cdr.detectChanges();
                     }
                 }
             },
             error: async (err) => {
-                console.error('Error al llamar a /me en el layout:', err);
-                // Si falla el backend, usamos el nombre de Keycloak por si acaso
                 const profile = await this.keycloakService.loadUserProfile();
-                this.usernameLogueado = profile.firstName || 'Usuario';
-                this.cdr.detectChanges();
+                this.loggedInUsername.set(profile.firstName || 'Usuario');
             }
         });
     }
+
     private async downloadProfileImage(imageUrl: string) {
         try {
             const token = await this.keycloakService.getToken();
@@ -106,8 +145,7 @@ export class MainLayoutComponent implements OnInit {
 
             if (response.ok) {
                 const blob = await response.blob();
-                this.profilePicUrl = URL.createObjectURL(blob);
-                this.cdr.detectChanges(); // Le avisa a Angular que ya dibujamos la imagen
+                this.profilePicUrl.set(URL.createObjectURL(blob));
             }
         } catch (error) {
             console.error('Error al descargar la imagen de perfil:', error);
@@ -133,24 +171,23 @@ export class MainLayoutComponent implements OnInit {
 
         this.itemsMenu = [];
 
-        if (this.isAdmin) {
+        if (this.isAdmin()) {
             this.itemsMenu.push(
                 {
                     label: 'Gestión Institucional',
                     icon: 'pi pi-building',
                     expanded: true,
                     items: [
-                        { label: 'Registrar Escuela', icon: 'pi pi-plus', routerLink: ['/admin/dashboard/registerSchool'] },
                         { label: 'Ver Escuelas', icon: 'pi pi-list', routerLink: ['/admin/dashboard/indexSchool'] },
-                        { label: 'Periodo Académico', icon: 'pi pi-calendar', routerLink: ['/admin/dashboard/indexAcademicPeriod'] },
-                        { label: 'Registrar Semestre', icon: 'pi pi-bookmark', routerLink: ['/admin/dashboard/registerSemester'] }
+                        { label: 'Ver Periodos Académicos', icon: 'pi pi-calendar', routerLink: ['/admin/dashboard/indexAcademicPeriod'] }
                     ]
                 },
                 {
                     label: 'Usuarios y Cursos',
                     icon: 'pi pi-users',
                     items: [
-                        { label: 'Registrar Profesor', icon: 'pi pi-user-plus', routerLink: ['/admin/dashboard/registerProfessor'] },
+                        { label: 'Administradores', icon: 'pi pi-shield', routerLink: ['/admin/dashboard/indexAdmin'] },
+                        { label: 'Profesores', icon: 'pi pi-id-card', routerLink: ['/admin/dashboard/indexProfessor'] },
                         { label: 'Registrar Alumno', icon: 'pi pi-user-plus', routerLink: ['/admin/dashboard/registerStudent'] },
                         { label: 'Ver Alumnos', icon: 'pi pi-eye', routerLink: ['/admin/dashboard/indexStudent'] },
                         { label: 'Registrar Curso', icon: 'pi pi-book', routerLink: ['/admin/dashboard/registerCourse'] }
@@ -168,7 +205,7 @@ export class MainLayoutComponent implements OnInit {
             );
         }
 
-        if (this.isProfessor) {
+        if (this.isProfessor()) {
             this.itemsMenu.push(
                 {
                     label: 'Herramientas Docente',
@@ -181,20 +218,20 @@ export class MainLayoutComponent implements OnInit {
             );
         }
 
-        if (this.isStudent) {
+        if (this.isStudent()) {
             this.itemsMenu.push(
                 {
                     label: 'Mi Espacio',
                     icon: 'pi pi-user',
                     expanded: true,
                     items: [
-                        { label: 'Ver Mis Calificaciones', icon: 'pi pi-percentage', routerLink: ['/alumno/dashboard/mis-notas'] }
+                        { label: 'Ver Mis Calificaciones', icon: 'pi pi-percentage', routerLink: ['/student/dashboard/reportCardStudent'] },
+                        { label: 'Ver Horarios', icon: 'pi pi-calendar', routerLink: ['/student/dashboard/showSchedule'] },
+                        { label: 'Comunicados y Documentos', icon: 'pi pi-bell', routerLink: ['/student/dashboard/schoolAnnouncements'] }
                     ]
                 }
             );
         }
-
-        this.cdr.markForCheck();
     }
 
     public logout() {
@@ -202,12 +239,32 @@ export class MainLayoutComponent implements OnInit {
     }
 
     public goToProfile() {
-        if (this.isAdmin) {
+        if (this.isAdmin()) {
             this.router.navigate(['/admin/dashboard/profile']);
-        } else if (this.isProfessor) {
+        } else if (this.isProfessor()) {
             this.router.navigate(['/professor/dashboard/profile']);
-        } else if (this.isStudent) {
+        } else if (this.isStudent()) {
             this.router.navigate(['/student/dashboard/profile']);
         }
+    }
+
+    public isDashboardHome(): boolean {
+        const url = this.router.url;
+        return url === '/student/dashboard' || url === '/professor/dashboard' || url === '/admin/dashboard' || 
+               url === '/student/dashboard/' || url === '/professor/dashboard/' || url === '/admin/dashboard/';
+    }
+
+    public getRoleIcon(): string {
+        if (this.isAdmin()) return 'pi pi-shield';
+        if (this.isProfessor()) return 'pi pi-briefcase';
+        if (this.isStudent()) return 'pi pi-graduation-cap';
+        return 'pi pi-user';
+    }
+
+    public getRoleSubtitle(): string {
+        if (this.isAdmin()) return 'Portal Admin';
+        if (this.isProfessor()) return 'Gestión Docente';
+        if (this.isStudent()) return 'Portal Académico';
+        return 'Portal';
     }
 }

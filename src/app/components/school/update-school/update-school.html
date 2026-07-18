@@ -1,65 +1,84 @@
-<div id="form" class="card w-full p-4">
-    <form [formGroup]="frmUpdateSchool">
-        <div class="card flex flex-wrap justify-center items-end gap-4 pb-2">
-            <label for="on_label">Nombre de la Escuela</label>
-            <input pInputText id="txtnameSchool" formControlName="nameSchool" autocomplete="off" />
-        </div>
+<p-toast [life]="2000"></p-toast>
+<div class="flex justify-content-center my-6">
+  <div class="surface-card p-5 shadow-2 border-round-2xl border-1 surface-border" style="width: 100%; max-width: 600px;">
+    <!-- Title banner -->
+    <div class="text-center mb-5 pb-4 border-bottom-1 surface-border">
+      <i class="pi pi-building text-primary text-4xl mb-3"></i>
+      <h2 class="text-2xl font-bold text-900 m-0">Actualizar Escuela Profesional</h2>
+      <p class="text-500 text-sm mt-2">Modifique los datos y escudo de la escuela profesional.</p>
+    </div>
 
-        <div class="card w-4">
-            <label for="on_label">Escudo Actual de la Escuela</label>
-            <p-toast />
-            <p-fileupload #imageUpload name="myfile[]" url="https://www.primefaces.org/cdn/api/upload.php" [multiple]="false" accept="image/*" maxFileSize="1000000" (onUpload)="onTemplatedUpload()" (onSelect)="onSelectedFiles($event)">
-                <ng-template #header let-files let-chooseCallback="chooseCallback" let-clearCallback="clearCallback" let-uploadCallback="uploadCallback">
-                    <div class="flex flex-wrap justify-between items-center flex-1 gap-4">
-                        <div class="flex gap-2">
-                            <p-button (onClick)="choose($event, chooseCallback)" icon="pi pi-images" [rounded]="true" [outlined]="true" />
-                        </div>
-                    </div>
-                </ng-template>
-                <ng-template #content let-files let-uploadedFiles="uploadedFiles" let-removeFileCallback="removeFileCallback" let-removeUploadedFileCallback="removeUploadedFileCallback">
-                    <div class="flex flex-col gap-8 pt-4">
-                        <div *ngIf="files?.length > 0">
-                            <h5>Imagen de Escuela</h5>
-                            <div class="flex flex-wrap gap-4">
-                                <div *ngFor="let file of files; let i = index" class="p-8 rounded-border flex flex-col border border-surface items-center gap-4">
-                                    <div>
-                                        <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="100" height="50" />
-                                    </div>
-                                    <span class="font-semibold text-ellipsis max-w-60 whitespace-nowrap overflow-hidden">{{ file.name }}</span>
-                                    <div>{{ formatSize(file.size) }}</div>
-                                </div>
+    <form [formGroup]="frmUpdateSchool" class="flex flex-column gap-4">
+      
+      <!-- Nombre de la Escuela -->
+      <div class="flex flex-column gap-2">
+        <label for="txtnameSchool" class="font-semibold text-800 text-sm">
+          Nombre de la Escuela <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="txtnameSchool" pInputText formControlName="nameSchool" autocomplete="off" placeholder="Ej. Ingeniería de Sistemas" class="w-full" style="border: 1px solid var(--surface-border); border-radius: 6px; padding: 10px;" />
+        @if ((nameSchoolfb.touched || nameSchoolfb.dirty) && nameSchoolfb.errors && nameSchoolfb.hasError('required')) {
+          <small class="p-error text-xs">Campo requerido.</small>
+        }
+      </div>
+
+      <!-- Imagen/Escudo de la Escuela -->
+      <div class="flex flex-column gap-2">
+        <label class="font-semibold text-800 text-sm">
+          Escudo o Imagen de la Escuela
+        </label>
+        
+        <p-fileupload #imageUpload name="myfile[]" url="https://www.primefaces.org/cdn/api/upload.php" [multiple]="false" accept="image/*" maxFileSize="1000000" (onUpload)="onTemplatedUpload()" (onSelect)="onSelectedFiles($event)" styleClass="w-full">
+            <ng-template #header let-files let-chooseCallback="chooseCallback" let-clearCallback="clearCallback" let-uploadCallback="uploadCallback">
+                <div class="flex flex-wrap justify-between align-items-center flex-1 gap-2">
+                    <p-button (onClick)="choose($event, chooseCallback)" icon="pi pi-image" label="Seleccionar Nuevo Escudo" [rounded]="true" [outlined]="true" size="small" />
+                </div>
+            </ng-template>
+            <ng-template #content let-files let-uploadedFiles="uploadedFiles" let-removeFileCallback="removeFileCallback" let-removeUploadedFileCallback="removeUploadedFileCallback">
+                <div class="flex flex-column gap-4 pt-3">
+                    <div *ngIf="files?.length > 0">
+                        <span class="text-xs font-bold text-600">Nuevo archivo seleccionado:</span>
+                        <div class="flex flex-wrap gap-3">
+                            <div *ngFor="let file of files; let i = index" class="p-3 border-round-xl flex flex-column border-1 surface-border align-items-center gap-2 surface-50">
+                                <img role="presentation" [alt]="file.name" [src]="file.objectURL" width="80" height="40" style="object-fit: contain;" />
+                                <span class="text-xs font-semibold text-ellipsis max-w-10rem whitespace-nowrap overflow-hidden text-700">{{ file.name }}</span>
+                                <div class="text-[10px] text-400">{{ formatSize(file.size) }}</div>
                             </div>
                         </div>
                     </div>
-                </ng-template>
-                <ng-template #file></ng-template>
-                <ng-template #empty>
-                    <div class="flex items-center justify-center flex-col">
-                        <div *ngIf="school?.urlImageSchool" class="flex flex-col items-center mb-6">
-                            <span class="font-bold mb-2 text-surface-500">Escudo Actual:</span>
-                            <img [src]="'http://localhost:8081/' + school.urlImageSchool" alt="Escudo actual" width="150" class="border-round shadow-2" />
-                        </div>
-
-                        <i onclick="choose($event, chooseCallback)" class="pi pi-cloud-upload border-2! rounded-full! p-8 !text-4xl! text-muted-color!"></i>
-                        <p class="mt-6 mb-0">Escudo de la Escuela Profesional.</p>
+                </div>
+            </ng-template>
+            <ng-template #file></ng-template>
+            <ng-template #empty>
+                <div class="flex align-items-center justify-content-center flex-column py-5 border-2 border-dashed surface-border border-round-xl surface-50 gap-3">
+                    <div *ngIf="school?.urlImageSchool" class="flex flex-column align-items-center">
+                        <span class="text-xs font-bold text-500 mb-2">Escudo Actual:</span>
+                        <img [src]="env.URL_NORMAL + school.urlImageSchool" alt="Escudo actual" width="100" class="border-round shadow-1 object-contain" />
                     </div>
-                </ng-template>
-            </p-fileupload>
-        </div>
+                    <div class="flex align-items-center justify-content-center flex-column">
+                        <i class="pi pi-cloud-upload text-3xl text-400 mb-2"></i>
+                        <p class="text-xs text-500 m-0">Suelte el nuevo escudo aquí para actualizarlo.</p>
+                    </div>
+                </div>
+            </ng-template>
+        </p-fileupload>
+      </div>
 
-        <div class="card flex justify-center pt-2">
-            <p-toast />
-            <p-confirmdialog>
-                <ng-template #message let-message>
-                    @if (message) {
-                        <div class="flex flex-col items-center w-full gap-4 border-b border-surface-200 dark:border-surface-700">
-                            <i [ngClass]="message.icon" class="text-6xl text-primary-500"></i>
-                            <p>{{ message.message }}</p>
-                        </div>
-                    }
-                </ng-template>
-            </p-confirmdialog>
-            <p-button (click)="sendUpdateSchool($event)" label="Save" />
-        </div>
+      <!-- Footer Action -->
+      <div class="flex justify-content-end pt-4 border-top-1 surface-border mt-3">
+        <p-confirmdialog>
+            <ng-template #message let-message>
+                @if (message) {
+                    <div class="flex flex-column align-items-center w-full gap-3 p-3">
+                        <i [ngClass]="message.icon" class="text-5xl text-primary-500"></i>
+                        <p class="text-base text-700 m-0">{{ message.message }}</p>
+                    </div>
+                }
+            </ng-template>
+        </p-confirmdialog>
+        
+        <p-button (click)="sendUpdateSchool($event)" icon="pi pi-save" label="Actualizar Escuela" styleClass="px-4 py-2" />
+      </div>
+
     </form>
+  </div>
 </div>

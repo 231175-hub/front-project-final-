@@ -16,10 +16,9 @@ export interface Registercourse$Params {
 'conceptualWeight'?: number;
 'credits'?: number;
 'idSchool'?: string;
-'idSemester'?: string;
 'nameCourse'?: string;
 'practicalWeight'?: number;
-'units'?: number[];
+'units'?: string;
 }
 }
 

@@ -8,6 +8,7 @@ import { Api } from '../../../api/api';
 
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { confirmAction } from '../../../core/utils/confirm.helper';
 import { ButtonModule } from 'primeng/button';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
 
@@ -15,6 +16,7 @@ import { BadgeModule } from 'primeng/badge';;
 import { ProgressBarModule } from 'primeng/progressbar';
 import { PrimeNG } from 'primeng/config';
 import { ActivatedRoute } from '@angular/router';
+import { enviroments } from '../../../enviroments/envitoments';
 @Component({
   selector: 'app-update-school',
   imports: [CommonModule, InputTextModule, FormsModule, ReactiveFormsModule, ButtonModule, ConfirmDialogModule, ToastModule, FileUploadModule, BadgeModule, ProgressBarModule],
@@ -27,6 +29,7 @@ export class UpdateSchool implements OnInit{
   @ViewChild('imageUpload') fileUploadComponent!: FileUpload;
 
   public school: any = [];
+  public env = enviroments;
 
   idOfPage: string | null = null;
   frmUpdateSchool: FormGroup; 
@@ -71,44 +74,26 @@ export class UpdateSchool implements OnInit{
       return
     }
 
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: '¿Desea ingresar esta escuela?',
-      header: 'Confirmación',
-      icon: 'pi-pi-info-circle',
-      rejectLabel: 'Cancel',
-      rejectButtonProps: {
-        label: 'Cancelar',
-        severity: 'secondary',
-        outlined: true
-      },
-      acceptButtonProps:{
-        label: 'Aceptar',
-        severity: 'primary'
-      },
-      
-      accept: () => {
-        const bodyParams = {
-          'idSchool': this.idOfPage!,
-          body: {
-            nameSchool: this.nameSchoolfb.value,
-            file: this.filefb.value,
-          }
-        };
+    confirmAction(this.confirmationService, event, '¿Desea ingresar esta escuela?', () => {
+      const bodyParams = {
+        'idSchool': this.idOfPage!,
+        body: {
+          nameSchool: this.nameSchoolfb.value,
+          file: this.filefb.value,
+        }
+      };
 
-        this.api.invoke(updateschool, bodyParams).then((response: any) => {
-          const updateSchool = typeof response === 'string' ? JSON.parse(response) : response;
-          this.frmUpdateSchool.reset();
-          
-          this.frmUpdateSchool.get('imageSchool')?.setValue(null);
-          if (this.fileUploadComponent) {
-            this.fileUploadComponent.clear();
-          }
-        }).catch((error) => {
-          this.messageService.add({ severity: 'error', summary: 'Exception', detail: 'Ups. Algo salio mal' + error});
-        });
-      },
-      reject: () => {}
+      this.api.invoke(updateschool, bodyParams).then((response: any) => {
+        const updateSchool = typeof response === 'string' ? JSON.parse(response) : response;
+        this.frmUpdateSchool.reset();
+        
+        this.frmUpdateSchool.get('imageSchool')?.setValue(null);
+        if (this.fileUploadComponent) {
+          this.fileUploadComponent.clear();
+        }
+      }).catch((error) => {
+        this.messageService.add({ severity: 'error', summary: 'Exception', detail: 'Ups. Algo salio mal' + error});
+      });
     });
   }
 
