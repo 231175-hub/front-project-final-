@@ -1,17 +1,13 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { KeycloakService, KeycloakAngularModule } from 'keycloak-angular';
+import { AuthService } from '../services/auth.service';
 
-export const authGuard: CanActivateFn = async (route, state) => {
-  const keycloak = inject(KeycloakService);
+export const authGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
   const router = inject(Router);
   
-  const isLoggedIn = keycloak.isLoggedIn();
-
-  if (!isLoggedIn) {
-    await keycloak.login({
-      redirectUri: window.location.origin + state.url
-    });
+  if (!authService.isLoggedIn()) {
+    router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
     return false;
   }
 
@@ -21,14 +17,16 @@ export const authGuard: CanActivateFn = async (route, state) => {
     return true;
   }
 
-  const userRoles = keycloak.getUserRoles();
+  const userRoles = authService.getUserRoles();
 
-  const hasRequiredRole = requiredRoles.some((role) => userRoles.includes(role));
+  const hasRequiredRole = requiredRoles.some((role) => 
+    userRoles.map(r => r.toUpperCase()).includes(role.toUpperCase())
+  );
 
   if (!hasRequiredRole) {
-    router.navigate(['/']);
+    router.navigate(['/login']);
     return false;
   }
 
   return true;
-}
+};

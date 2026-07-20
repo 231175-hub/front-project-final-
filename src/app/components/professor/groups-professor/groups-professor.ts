@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { ButtonModule } from 'primeng/button';
-import { KeycloakService } from 'keycloak-angular'; 
+import { AuthService } from '../../../core/services/auth.service'; 
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Api } from '../../../api/api';
@@ -26,22 +26,22 @@ export class GroupsProfessor implements OnInit {
   constructor(
     private api: Api, 
     private cdr: ChangeDetectorRef, 
-    private keycloakService: KeycloakService,
+    private authService: AuthService,
     private router: Router,
     private http: HttpClient
   ) {}
 
   async ngOnInit(): Promise<void> {
-    if (await this.keycloakService.isLoggedIn()) {
+    if (this.authService.isLoggedIn()) {
       try {
-        const userProfile = await this.keycloakService.loadUserProfile();
-        this.idProfesorReal = userProfile.id || '';
+        const user = this.authService.getCurrentUser();
+        this.idProfesorReal = user ? user.idUser : '';
         
         if (this.idProfesorReal) {
           this.loadGroups(this.idProfesorReal);
         }
       } catch (error) {
-        console.error("Error al obtener el perfil de Keycloak", error);
+        console.error("Error al obtener el perfil de usuario", error);
       }
     }
   }

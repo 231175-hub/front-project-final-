@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { KeycloakService } from 'keycloak-angular';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../core/services/auth.service';
 
 import { me, uploadimg, Uploadimg$Params } from '../../api/functions';
 import { Api } from '../../api/api';
@@ -29,7 +29,7 @@ export class ProfileComponent implements OnInit {
   public isUploading: boolean = false;
 
   private http = inject(HttpClient);
-  private keycloakService = inject(KeycloakService);
+  private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   private messageService = inject(MessageService);
 
@@ -42,16 +42,12 @@ export class ProfileComponent implements OnInit {
   private async loadMyProfile() {
     const urlDinamica = this.apiConfig.rootUrl;
 
-    try {
-      const profile = await this.keycloakService.loadUserProfile();
-      this.email = profile.email || '';
-      
-      const roles = this.keycloakService.getUserRoles();
-      const userRoles = roles.filter(r => ['ADMIN', 'PROFESSOR', 'STUDENT'].includes(r));
-      this.role = userRoles.length > 0 ? userRoles[0] : (roles[0] || 'Usuario');
+    const user = this.authService.getCurrentUser();
+    if (user) {
+      this.email = user.email || '';
+      this.role = user.role || 'Usuario';
+      this.usernameLogueado = user.fullName || 'Usuario';
       this.cdr.detectChanges();
-    } catch (err) {
-      console.error('Error al cargar datos del perfil desde Keycloak:', err);
     }
 
     me(this.http, urlDinamica).subscribe({
@@ -60,6 +56,8 @@ export class ProfileComponent implements OnInit {
             
             if (profileData) {
                 this.usernameLogueado = profileData.full_name || 'Usuario';
+                if (profileData.email) this.email = profileData.email;
+                if (profileData.role) this.role = profileData.role;
                 this.cdr.detectChanges();
 
                 if (profileData.url_image) {
@@ -75,10 +73,8 @@ export class ProfileComponent implements OnInit {
                 }
             }
         },
-        error: async (err) => {
+        error: (err) => {
             console.error('Error al llamar a /me en el perfil:', err);
-            const profile = await this.keycloakService.loadUserProfile();
-            this.usernameLogueado = profile.firstName || 'Usuario';
             this.cdr.detectChanges();
         }
     });
@@ -86,8 +82,7 @@ export class ProfileComponent implements OnInit {
 
   private async downloadProfileImage(imageUrl: string) {
     try {
-      await this.keycloakService.updateToken(20);
-      const token = await this.keycloakService.getToken();
+      const token = this.authService.getToken();
       const response = await fetch(imageUrl, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }

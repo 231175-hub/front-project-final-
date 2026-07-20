@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { HttpClient } from '@angular/common/http';
-import { KeycloakService } from 'keycloak-angular';
+import { AuthService } from '../../../core/services/auth.service';
 import { Api } from '../../../api/api';
 import { showstudent } from '../../../api/functions';
 import { enviroments } from '../../../enviroments/envitoments';
@@ -31,29 +31,27 @@ export class SchoolAnnouncementsComponent implements OnInit {
   totalRecords: number = 0;
   paginatedAnnouncements: any[] = [];
 
-  private keycloakService = inject(KeycloakService);
+  private authService = inject(AuthService);
   private api = inject(Api);
   private http = inject(HttpClient);
   private messageService = inject(MessageService);
   private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    // Diferir la inicialización asíncrona a la siguiente macrotarea (next tick)
-    // para evitar el error 'ExpressionChangedAfterItHasBeenCheckedError' (NG0100)
     setTimeout(async () => {
-      if (await this.keycloakService.isLoggedIn()) {
+      if (this.authService.isLoggedIn()) {
         try {
-          const userProfile = await this.keycloakService.loadUserProfile();
-          const keycloakId = userProfile.id || '';
+          const currentUser = this.authService.getCurrentUser();
+          const userId = currentUser ? currentUser.idUser : '';
           
-          if (keycloakId) {
-            this.loadStudentAndAnnouncements(keycloakId);
+          if (userId) {
+            this.loadStudentAndAnnouncements(userId);
           } else {
             this.loading = false;
             this.cdr.detectChanges();
           }
         } catch (err) {
-          console.error('Error fetching keycloak user profile:', err);
+          console.error('Error fetching user profile:', err);
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -64,8 +62,8 @@ export class SchoolAnnouncementsComponent implements OnInit {
     });
   }
 
-  loadStudentAndAnnouncements(keycloakId: string): void {
-    this.api.invoke(showstudent, { idStudent: keycloakId }).then((response: any) => {
+  loadStudentAndAnnouncements(userId: string): void {
+    this.api.invoke(showstudent, { idStudent: userId }).then((response: any) => {
       const parseResponse = typeof response === 'string' ? JSON.parse(response) : response;
       this.student = parseResponse.data ? parseResponse.data : parseResponse;
       

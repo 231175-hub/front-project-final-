@@ -27,10 +27,12 @@ import { ReportCard } from './components/student/report-card/report-card';
 import { ScheduleShow } from './components/schedule/schedule-show/schedule-show';
 import { ProfileComponent } from './components/profile/profile';
 import { SchoolAnnouncementsComponent } from './components/student/school-announcements/school-announcements';
+import { LoginComponent } from './components/login/login.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
 
 export const routes: Routes = [
-    { path: '', component:RootDispatcherComponent },
+    { path: 'login', component: LoginComponent },
+    { path: '', component: RootDispatcherComponent },
     {
         path: 'admin/dashboard', component: MainLayoutComponent,
         canActivate: [authGuard],

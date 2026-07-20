@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../../api/api';
-import { KeycloakService } from 'keycloak-angular';
+import { AuthService } from '../../../core/services/auth.service';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
@@ -68,7 +68,7 @@ export class GroupRegisterComponent implements OnInit, OnDestroy {
     private router: Router,
     private api: Api,
     private cdr: ChangeDetectorRef,
-    private keycloakService: KeycloakService
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -109,11 +109,11 @@ export class GroupRegisterComponent implements OnInit, OnDestroy {
 
   async setupConcurrency() {
     try {
-      if (await this.keycloakService.isLoggedIn()) {
-        const profile = await this.keycloakService.loadUserProfile();
-        this.currentUserFullName = (profile.firstName || '') + ' ' + (profile.lastName || '');
+      if (this.authService.isLoggedIn()) {
+        const profile = this.authService.getCurrentUser();
+        this.currentUserFullName = profile ? profile.fullName : 'Docente Anónimo';
         if (!this.currentUserFullName.trim()) {
-          this.currentUserFullName = profile.username || 'Docente Anónimo';
+          this.currentUserFullName = 'Docente Anónimo';
         }
         const sseUrl = `${this.api.rootUrl}/concurrency/active-session/${this.idGroup}/${encodeURIComponent(this.currentUserFullName)}`;
         this.sseSource = new EventSource(sseUrl);

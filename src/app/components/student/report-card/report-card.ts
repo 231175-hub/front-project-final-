@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ButtonModule } from 'primeng/button';
-import { KeycloakService } from 'keycloak-angular';
+import { AuthService } from '../../../core/services/auth.service';
 import { Api } from '../../../api/api';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -28,7 +28,7 @@ export class ReportCard implements OnInit {
   public chartData = signal<any>(null);
   public chartOptions = signal<any>(null);
 
-  private keycloakService = inject(KeycloakService);
+  private authService = inject(AuthService);
   private api = inject(Api);
   private messageService = inject(MessageService);
   private http = inject(HttpClient);
@@ -36,13 +36,13 @@ export class ReportCard implements OnInit {
   constructor() {}
 
   async ngOnInit() {
-    if (await this.keycloakService.isLoggedIn()) {
+    if (this.authService.isLoggedIn()) {
       try {
-        const userProfile = await this.keycloakService.loadUserProfile();
-        const idStudentKeycloak = userProfile.id || '';
+        const user = this.authService.getCurrentUser();
+        const idStudent = user ? user.idUser : '';
 
-        if (idStudentKeycloak) {
-          this.loadReportCards(idStudentKeycloak);
+        if (idStudent) {
+          this.loadReportCards(idStudent);
         }
       } catch (err) {
         console.error('Error getting user profile', err);
@@ -80,7 +80,6 @@ export class ReportCard implements OnInit {
         });
 
         this.reportCards.set(mapped);
-        this.generateChartData(mapped);
       } else {
         this.errorMessage.set(apiResponseTemp.message || apiResponseTemp.error);
       }
@@ -93,69 +92,6 @@ export class ReportCard implements OnInit {
     });
   }
 
-  generateChartData(mapped: any[]): void {
-    if (!mapped || mapped.length === 0) return;
-    const courseNames = mapped.map((b: any) => b.nombreCurso);
-    const finalGrades = mapped.map((b: any) => {
-      const val = Number(b.promedioGeneral);
-      return isNaN(val) ? 0 : val;
-    });
-
-    this.chartData.set({
-      labels: courseNames,
-      datasets: [
-        {
-          label: 'Promedio Final del Curso',
-          data: finalGrades,
-          backgroundColor: 'rgba(2, 132, 199, 0.2)',
-          borderColor: '#0284c7',
-          pointBackgroundColor: '#0284c7',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#0284c7',
-          fill: true
-        }
-      ]
-    });
-
-    this.chartOptions.set({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          labels: {
-            color: '#4b5563',
-            font: {
-              weight: '600'
-            }
-          }
-        }
-      },
-      scales: {
-        r: {
-          angleLines: {
-            display: true,
-            color: 'rgba(0, 0, 0, 0.1)'
-          },
-          suggestedMin: 0,
-          suggestedMax: 20,
-          ticks: {
-            stepSize: 4,
-            color: '#4b5563'
-          },
-          pointLabels: {
-            color: '#1f2937',
-            font: {
-              size: 11,
-              weight: 'bold'
-            }
-          }
-        }
-      }
-    });
-  }
-
   previewCertificate(): void {
     this.isDownloadingCertificate.set(true);
     this.messageService.add({ 
@@ -164,7 +100,11 @@ export class ReportCard implements OnInit {
       detail: 'Preparando tu Constancia de Matrícula, un momento por favor...' 
     });
 
-    this.http.get(`${this.api.rootUrl}/intranet/downloadscorepdf`, {
+    const endpoint = this.api.rootUrl.endsWith('/intranet') 
+      ? `${this.api.rootUrl}/downloadscorepdf` 
+      : `${this.api.rootUrl}/intranet/downloadscorepdf`;
+
+    this.http.get(endpoint, {
       responseType: 'blob'
     }).subscribe({
       next: (pdfBlob: Blob) => {
@@ -198,7 +138,11 @@ export class ReportCard implements OnInit {
       detail: 'Preparando tu Historial Académico, un momento por favor...' 
     });
 
-    this.http.get(`${this.api.rootUrl}/intranet/downloadrecordpdf`, {
+    const endpoint = this.api.rootUrl.endsWith('/intranet') 
+      ? `${this.api.rootUrl}/downloadrecordpdf` 
+      : `${this.api.rootUrl}/intranet/downloadrecordpdf`;
+
+    this.http.get(endpoint, {
       responseType: 'blob'
     }).subscribe({
       next: (pdfBlob: Blob) => {

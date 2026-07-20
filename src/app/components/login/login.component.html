@@ -1,0 +1,93 @@
+<div class="login-wrapper">
+	<div class="polygon-one"></div>
+	<div class="polygon-two"></div>
+
+	<div class="welcome">
+		<h1>¡Bienvenido!</h1>
+		<p>Te damos la Bienvenida al sistema Intranet UNAMBA</p>
+	</div>
+
+	<img class="micaela-bastidas" src="/img/Micaela-Bastidas.png" alt="Micaela Bastidas">
+
+	<div class="logo-container">
+		<img src="/img/unamba-logo.png" alt="Logo UNAMBA">
+	</div>
+
+	<div class="container" [ngClass]="{'right-panel-active': rightPanelActive}" id="container">
+		
+		<!-- Panel de Restablecer Contraseña -->
+		<div class="form-container sign-up-container">
+			<form (ngSubmit)="onResetPassword()">
+				<h1>¿Olvidaste Tu Contraseña?</h1>
+				<span>Ingresa tu Email para restablecerla</span>
+				
+				<input type="email" name="resetEmail" [(ngModel)]="resetEmail" placeholder="Email" required />
+				
+				<button type="submit" [disabled]="isResetLoading">
+					<span *ngIf="!isResetLoading">Restablecer</span>
+					<span *ngIf="isResetLoading">Enviando...</span>
+				</button>
+				
+				<p *ngIf="resetMessage" 
+				   [style.color]="resetMessageType === 'success' ? '#16a34a' : '#ef4444'" 
+				   style="font-size: 13px; margin-top: 10px; font-weight: bold;">
+					{{ resetMessage }}
+				</p>
+				
+				<a (click)="openSignInPanel()" class="mobile-only-link" style="cursor: pointer; margin-top: 15px;">
+					¿Recordaste tu contraseña? <u>Iniciar Sesión</u>
+				</a>
+			</form>
+		</div>
+
+		<!-- Panel de Iniciar Sesión -->
+		<div class="form-container sign-in-container">
+			<form (ngSubmit)="onLogin()">
+				<h1>Iniciar Sesión</h1>
+				<span>Ingrese su Correo y Contraseña</span>
+
+				<div *ngIf="loginError" class="error-box">
+					{{ loginError }}
+				</div>
+
+				<div class="input-wrapper">
+					<input type="email" name="loginEmail" [(ngModel)]="loginEmail" placeholder="Email" required />
+				</div>
+
+				<div class="input-wrapper password-input-container">
+					<input [type]="showPassword ? 'text' : 'password'" name="loginPassword" [(ngModel)]="loginPassword" placeholder="Contraseña" required />
+					<img id="eye-icon" 
+						 [src]="showPassword ? '/img/esconder.png' : '/img/ver.png'" 
+						 (click)="togglePasswordVisibility()" 
+						 alt="Mostrar/Ocultar Contraseña">
+				</div>
+
+				<a (click)="openSignUpPanel()" id="forgotPassword" style="cursor: pointer;">¿<u>Olvidaste Tu Contraseña</u>?</a>
+				
+				<button type="submit" [disabled]="isLoginLoading">
+					<span *ngIf="!isLoginLoading">Ingresar</span>
+					<span *ngIf="isLoginLoading">Ingresando...</span>
+				</button>
+			</form>
+		</div>
+
+		<!-- Overlay de Transición Deslizante -->
+		<div class="overlay-container">
+			<div class="overlay">
+				<div class="overlay-panel overlay-left">
+					<img id="shield" src="/img/unamba-logo-2.png" alt="Escudo UNAMBA">
+					<h1>¡Bienvenido!</h1>
+					<p>¿Tienes Una Cuenta? Inicia Sesión aquí</p>
+					<button class="ghost" (click)="openSignInPanel()">Ingresar</button>
+				</div>
+				<div class="overlay-panel overlay-right">
+					<img id="secondaryLogo" src="/img/unamba-logo.png" alt="Logo UNAMBA Secundario">
+					<h1>¡Hola!</h1>
+					<p>¿Olvidaste tu contraseña? Ingresa aquí para poder restablecerla</p>
+					<button class="ghost" (click)="openSignUpPanel()">Restablecer Contraseña</button>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>

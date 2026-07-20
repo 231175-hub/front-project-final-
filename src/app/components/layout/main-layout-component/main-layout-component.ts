@@ -8,7 +8,7 @@ import { RippleModule } from 'primeng/ripple';
 import { BadgeModule } from 'primeng/badge';
 import { PanelMenuModule } from 'primeng/panelmenu';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
-import { KeycloakService } from 'keycloak-angular';
+import { AuthService } from '../../../core/services/auth.service';
 
 import { HttpClient } from '@angular/common/http';
 import { ApiConfiguration } from '../../../api/api-configuration';
@@ -72,7 +72,7 @@ export class MainLayoutComponent implements OnInit {
 
     private http = inject(HttpClient);
     private apiConfig = inject(ApiConfiguration);
-    private keycloakService = inject(KeycloakService);
+    private authService = inject(AuthService);
     private router = inject(Router);
 
     constructor() {
@@ -90,9 +90,9 @@ export class MainLayoutComponent implements OnInit {
             this.isDarkMode.set(true);
         }
 
-        if (await this.keycloakService.isLoggedIn()) {
+        if (this.authService.isLoggedIn()) {
             try {
-                const roles = this.keycloakService.getUserRoles();
+                const roles = this.authService.getUserRoles();
                 this.isAdmin.set(roles.includes('ADMIN'));
                 this.isProfessor.set(roles.includes('PROFESSOR'));
                 this.isStudent.set(roles.includes('STUDENT'));
@@ -117,6 +117,20 @@ export class MainLayoutComponent implements OnInit {
                 if (profileData) {
                     this.loggedInUsername.set(profileData.full_name || 'Usuario');
 
+                    if (profileData.role && profileData.role !== 'Sin Rol') {
+                        const user = this.authService.getCurrentUser();
+                        if (user) {
+                            user.role = profileData.role;
+                            this.authService.updateStoredUser(user);
+                        }
+                    }
+
+                    const roles = this.authService.getUserRoles();
+                    this.isAdmin.set(roles.includes('ADMIN'));
+                    this.isProfessor.set(roles.includes('PROFESSOR'));
+                    this.isStudent.set(roles.includes('STUDENT'));
+                    this.buildNavigationMenus();
+
                     if (profileData.url_image) {
                         const timestamp = new Date().getTime();
                         let imageUrl = `${urlDinamica}${profileData.url_image}`;
@@ -129,15 +143,15 @@ export class MainLayoutComponent implements OnInit {
                 }
             },
             error: async (err) => {
-                const profile = await this.keycloakService.loadUserProfile();
-                this.loggedInUsername.set(profile.firstName || 'Usuario');
+                const user = this.authService.getCurrentUser();
+                this.loggedInUsername.set(user ? user.fullName : 'Usuario');
             }
         });
     }
 
     private async downloadProfileImage(imageUrl: string) {
         try {
-            const token = await this.keycloakService.getToken();
+            const token = this.authService.getToken();
             const response = await fetch(imageUrl, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -235,7 +249,7 @@ export class MainLayoutComponent implements OnInit {
     }
 
     public logout() {
-        this.keycloakService.logout(window.location.origin);
+        this.authService.logout();
     }
 
     public goToProfile() {

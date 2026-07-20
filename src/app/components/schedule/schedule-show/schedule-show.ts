@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Api } from '../../../api/api';
 import { indexschedule } from '../../../api/functions'; 
 import { CommonModule } from '@angular/common';
-import { KeycloakService } from 'keycloak-angular';
+import { AuthService } from '../../../core/services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -48,7 +48,7 @@ export class ScheduleShow implements OnInit {
   constructor(
     private api: Api, 
     private cdr: ChangeDetectorRef,
-    private keycloakService: KeycloakService,
+    private authService: AuthService,
     private messageService: MessageService
   ) {}
  
@@ -202,8 +202,7 @@ export class ScheduleShow implements OnInit {
     });
 
     try {
-      await this.keycloakService.updateToken(20);
-      const token = await this.keycloakService.getToken();
+      const token = this.authService.getToken();
 
       const response = await fetch(`${this.api.rootUrl}/downloadschedulepdf`, {
         method: 'GET',
