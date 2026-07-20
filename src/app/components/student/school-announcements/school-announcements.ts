@@ -69,7 +69,17 @@ export class SchoolAnnouncementsComponent implements OnInit {
       
       if (this.student && this.student.parentSchool) {
         this.school = this.student.parentSchool;
-        this.cdr.detectChanges(); // Forzar detección de cambios al actualizar la escuela para el header banner
+        if (this.school.urlImageSchool) {
+          let path = this.school.urlImageSchool.replace(/\\/g, '/');
+          if (path.startsWith('http://') || path.startsWith('https://')) {
+            this.school.urlImageSchool = path;
+          } else {
+            if (path.startsWith('/')) path = path.substring(1);
+            let baseUrl = enviroments.URL_NORMAL.endsWith('/') ? enviroments.URL_NORMAL : `${enviroments.URL_NORMAL}/`;
+            this.school.urlImageSchool = baseUrl + encodeURI(path);
+          }
+        }
+        this.cdr.detectChanges();
         this.loadSchoolFiles(this.school.idSchool);
       } else {
         this.announcementsList = [];
@@ -88,13 +98,12 @@ export class SchoolAnnouncementsComponent implements OnInit {
   loadSchoolFiles(idSchool: string): void {
     this.http.get(`${this.api.rootUrl}/indexschoolfile/${idSchool}`).subscribe({
       next: (files: any) => {
-        // Ordenar comunicados por fecha de creación descendente (los más recientes primero)
         if (Array.isArray(files)) {
           files.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         }
         this.announcementsList = files || [];
         this.totalRecords = this.announcementsList.length;
-        this.first = 0; // resetear a la primera página en cada recarga
+        this.first = 0;
         this.updatePaginatedAnnouncements();
         this.loading = false;
         this.cdr.detectChanges();
