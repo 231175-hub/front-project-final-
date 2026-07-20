@@ -4,7 +4,7 @@ import { ButtonModule } from 'primeng/button';
 import { Api } from '../../../api/api';
 import { deleteschool, indexschool, registerschool, Registerschool$Params, updateschool } from '../../../api/functions';
 import { CommonModule } from '@angular/common';
-import { enviroments } from '../../../enviroments/envitoments'
+import { enviroments } from '../../../enviroments/envitoments';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DialogModule } from 'primeng/dialog';
 import { FileUpload, FileUploadModule } from 'primeng/fileupload';
@@ -93,14 +93,19 @@ export class SchoolIndex implements OnInit {
 			
 			this.schoolList = tempSchool.map((school: any) => {
 				if (school.urlImageSchool) {
-					let correctPath = school.urlImageSchool.replace(/\\/g, '/');
-					let baseUrl = enviroments.URL_NORMAL;
-					if (!baseUrl.endsWith('/')) {
-						baseUrl += '/';
+					let path = school.urlImageSchool.replace(/\\/g, '/');
+					if (path.startsWith('http://') || path.startsWith('https://')) {
+						school.urlImageSchool = path;
+					} else {
+						if (path.startsWith('/')) {
+							path = path.substring(1);
+						}
+						let baseUrl = enviroments.URL_NORMAL;
+						if (!baseUrl.endsWith('/')) {
+							baseUrl += '/';
+						}
+						school.urlImageSchool = baseUrl + encodeURI(path);
 					}
-
-					const buildPath = encodeURI(correctPath);
-					school.urlImageSchool = baseUrl + buildPath;
 				}
 				return school;
 			});
@@ -112,7 +117,7 @@ export class SchoolIndex implements OnInit {
 
 	public delete(idSchool: string) {
 		this.api.invoke(deleteschool, { idSchool: idSchool }).then((response: any) => {
-			this.schoolList = this.schoolList.filter(school => school.idSchool !== idSchool)
+			this.schoolList = this.schoolList.filter(school => school.idSchool !== idSchool);
 			this.cdr.detectChanges();
 		}).catch((error) => {
 			console.log("Error la escuela no se elimino " + error);
@@ -164,8 +169,6 @@ export class SchoolIndex implements OnInit {
 		this.selectedFile = null;
 		this.cdr.detectChanges();
 	}
-
-
 
 	getCleanFileName(name: string): string {
 		if (name && name.includes('_')) {
