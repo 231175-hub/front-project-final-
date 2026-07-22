@@ -1,26 +1,29 @@
 <p-toast></p-toast>
 <div class="flex justify-content-center my-6 px-3">
-  <div class="surface-card border-1 surface-border shadow-2 border-round-2xl overflow-hidden w-full" style="max-width: 800px;">
+  <div class="surface-card border-1 surface-border shadow-2 border-round-2xl overflow-hidden w-full"
+    style="max-width: 800px;">
     <!-- Header Banner -->
-    <div class="px-5 py-4 text-white flex justify-content-between align-items-center" style="background: linear-gradient(to right, var(--blue-700), var(--indigo-900));">
+    <div class="px-5 py-4 text-white flex justify-content-between align-items-center"
+      style="background: linear-gradient(to right, var(--blue-700), var(--indigo-900));">
       <div>
         <h2 class="text-xl font-bold text-white m-0">Registrar Administrador</h2>
-        <p class="text-xs text-blue-100 mt-1 m-0">Complete los datos para registrar un nuevo administrador del sistema.</p>
+        <p class="text-xs text-blue-100 mt-1 m-0">Complete los datos para registrar un nuevo administrador del sistema.
+        </p>
       </div>
       <i class="pi pi-user-plus text-2xl text-blue-200"></i>
     </div>
-    
+
     <form [formGroup]="frmInsertAdmin" class="p-5 flex flex-column gap-4">
       <div class="grid">
-        
+
         <!-- Nombres -->
         <div class="col-12 md:col-6 flex flex-column gap-2">
           <label for="firtsName" class="text-sm font-semibold text-700">
             Nombres <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="firtsName" pInputText formControlName="firstName" placeholder="Nombre completo" class="w-full" />
+          <input type="text" id="firtsName" pInputText formControlName="firstName" pattern="[A-Za-z\s]+" placeholder="Nombre completo" class="w-full" />
           @if ((firstNamefb.touched || firstNamefb.dirty) && firstNamefb.errors && firstNamefb.hasError('required')) {
-            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
         </div>
 
@@ -29,9 +32,10 @@
           <label for="surName" class="text-sm font-semibold text-700">
             Apellidos <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="surName" pInputText formControlName="surName" placeholder="Apellidos completos" class="w-full" />
+          <input type="text" id="surName" pattern="[A-Za-z\s]+" pInputText formControlName="surName" placeholder="Apellidos completos"
+            class="w-full" />
           @if ((surNamefb.touched || surNamefb.dirty) && surNamefb.errors && surNamefb.hasError('required')) {
-            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
         </div>
 
@@ -40,9 +44,10 @@
           <label for="email" class="text-sm font-semibold text-700">
             Email <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="email" pInputText formControlName="email" placeholder="Email institucional" class="w-full" />
+          <input type="text" id="email" pInputText formControlName="email" placeholder="Email institucional"
+            class="w-full" />
           @if ((emailfb.touched || emailfb.dirty) && emailfb.errors && emailfb.hasError('required')) {
-            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
         </div>
 
@@ -51,16 +56,18 @@
           <label for="password" class="text-sm font-semibold text-700">
             Contraseña <span class="text-red-500 font-bold">*</span>
           </label>
-          <p-password formControlName="password" id="password" [toggleMask]="true" [feedback]="false" autocomplete="off" styleClass="w-full" class="w-full" />
+          <p-password formControlName="password" id="password" [toggleMask]="true" [feedback]="false" autocomplete="off"
+            styleClass="w-full" class="w-full" />
           @if ((passwordfb.touched || passwordfb.dirty) && passwordfb.errors && passwordfb.hasError('required')) {
-            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
         </div>
 
       </div>
 
       <div class="flex justify-content-end pt-4 border-top-1 surface-border">
-        <p-button (click)="sendInsertAdmin($event)" icon="pi pi-save" label="Guardar Administrador" styleClass="px-4 border-round-lg" />
+        <p-button (click)="sendInsertAdmin($event)" icon="pi pi-save" label="Guardar Administrador"
+          styleClass="px-4 border-round-lg" />
       </div>
     </form>
   </div>

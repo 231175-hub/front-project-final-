@@ -18,7 +18,7 @@
           <label for="firstName" class="text-sm font-semibold text-700">
             Nombres <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="firstName" pInputText formControlName="firstName" placeholder="Nombres" class="w-full" />
+          <input type="text" id="firstName" pattern="[A-Za-z\s]+" pInputText formControlName="firstName" placeholder="Nombres" class="w-full" />
           @if ((firstNamefb.touched || firstNamefb.dirty) && firstNamefb.errors && firstNamefb.hasError('required')) {
             <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
@@ -29,7 +29,7 @@
           <label for="surName" class="text-sm font-semibold text-700">
             Apellidos <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="surName" pInputText formControlName="surName" placeholder="Apellidos" class="w-full" />
+          <input type="text" id="surName" pattern="[A-Za-z/s]+" pInputText formControlName="surName" placeholder="Apellidos" class="w-full" />
           @if ((surNamefb.touched || surNamefb.dirty) && surNamefb.errors && surNamefb.hasError('required')) {
             <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }

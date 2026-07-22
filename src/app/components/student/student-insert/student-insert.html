@@ -29,7 +29,7 @@
           <label for="code" class="text-sm font-semibold text-700">
             Código del Alumno <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="code" pInputText formControlName="code" placeholder="Código del Alumno" class="w-full" />
+          <input type="number" step="1" id="code" pattern="^20\d*$" maxlength="6" pInputText formControlName="code" placeholder="Código del Alumno" class="w-full" />
           @if ((codefb.touched || codefb.dirty) && codefb.errors && codefb.hasError('required')) {
             <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
@@ -40,7 +40,7 @@
           <label for="firtsName" class="text-sm font-semibold text-700">
             Nombres <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="firtsName" pInputText formControlName="firstName" placeholder="Nombres" class="w-full" />
+          <input type="text" pattern="[A-Za-z/s]+" id="firtsName" pInputText formControlName="firstName" placeholder="Nombres" class="w-full" />
           @if ((firstNamefb.touched || firstNamefb.dirty) && firstNamefb.errors && firstNamefb.hasError('required')) {
             <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
@@ -51,7 +51,7 @@
           <label for="surName" class="text-sm font-semibold text-700">
             Apellidos <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="surName" pInputText formControlName="surName" placeholder="Apellidos" class="w-full" />
+          <input type="text" pattern="[A-Za-z\s]+" id="surName" pInputText formControlName="surName" placeholder="Apellidos" class="w-full" />
           @if ((surNamefb.touched || surNamefb.dirty) && surNamefb.errors && surNamefb.hasError('required')) {
             <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
@@ -84,7 +84,7 @@
           <label for="totalCredits" class="text-sm font-semibold text-700">
             Créditos Totales <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="totalCredits" pInputText formControlName="totalCredits" placeholder="Créditos Totales" class="w-full" />
+          <input type="number" step="1" id="totalCredits" pInputText formControlName="totalCredits" placeholder="Créditos Totales" class="w-full" />
           @if ((totalCreditsfb.touched || totalCreditsfb.dirty) && totalCreditsfb.errors && totalCreditsfb.hasError('required')) {
             <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
