@@ -18,9 +18,14 @@
           <label for="firstName" class="text-sm font-semibold text-700">
             Nombres <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="firstName" pattern="[A-Za-z\s]+" pInputText formControlName="firstName" placeholder="Nombres" class="w-full" />
-          @if ((firstNamefb.touched || firstNamefb.dirty) && firstNamefb.errors && firstNamefb.hasError('required')) {
-            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          <input type="text" id="firstName" pInputText formControlName="firstName" (keypress)="blockNonLetters($event)" placeholder="Nombres" class="w-full" />
+          @if ((firstNamefb.touched || firstNamefb.dirty) && firstNamefb.errors) {
+            @if (firstNamefb.hasError('required')) {
+              <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+            }
+            @if (firstNamefb.hasError('pattern')) {
+              <small class="text-red-500 text-xs font-medium">El nombre solo debe contener letras.</small>
+            }
           }
         </div>
 
@@ -29,9 +34,14 @@
           <label for="surName" class="text-sm font-semibold text-700">
             Apellidos <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="text" id="surName" pattern="[A-Za-z/s]+" pInputText formControlName="surName" placeholder="Apellidos" class="w-full" />
-          @if ((surNamefb.touched || surNamefb.dirty) && surNamefb.errors && surNamefb.hasError('required')) {
-            <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+          <input type="text" id="surName" pInputText formControlName="surName" (keypress)="blockNonLetters($event)" placeholder="Apellidos" class="w-full" />
+          @if ((surNamefb.touched || surNamefb.dirty) && surNamefb.errors) {
+            @if (surNamefb.hasError('required')) {
+              <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+            }
+            @if (surNamefb.hasError('pattern')) {
+              <small class="text-red-500 text-xs font-medium">Los apellidos solo deben contener letras.</small>
+            }
           }
         </div>
 

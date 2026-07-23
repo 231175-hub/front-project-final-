@@ -50,11 +50,17 @@ export class ProfessorIndex implements OnInit {
 
   constructor(private formBuilder: FormBuilder, private api: Api, private cdr: ChangeDetectorRef) {
     this.frmInsertProfessor = this.formBuilder.group({
-      'firstName': ['', [Validators.required]],
-      'surName': ['', [Validators.required]],
+      'firstName': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
+      'surName': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
       'email': ['', [Validators.required]],
       'password': ['', [Validators.required]]
     });
+  }
+
+  blockNonLetters(event: KeyboardEvent): void {
+    if (!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]$/.test(event.key)) {
+      event.preventDefault();
+    }
   }
 
   ngOnInit(): void {
