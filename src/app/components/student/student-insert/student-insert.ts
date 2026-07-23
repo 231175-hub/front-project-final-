@@ -7,8 +7,10 @@ import { PasswordModule } from 'primeng/password';
 import { SelectModule } from 'primeng/select';
 import { Button } from "primeng/button";
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { inject } from '@angular/core';
+import { confirmAction } from '../../../core/utils/confirm.helper';
 
 interface School {
   nameSchool: string;
@@ -17,14 +19,15 @@ interface School {
 
 @Component({
   selector: 'app-student-insert',
-  imports: [ReactiveFormsModule, InputTextModule, FormsModule, PasswordModule, SelectModule, Button, ToastModule],
-  providers: [MessageService],
+  imports: [ReactiveFormsModule, InputTextModule, FormsModule, PasswordModule, SelectModule, Button, ToastModule, ConfirmDialogModule],
+  providers: [MessageService, ConfirmationService],
   templateUrl: './student-insert.html',
   styleUrl: './student-insert.css',
 })
 export class StudentInsert implements OnInit{
 
   private messageService = inject(MessageService);
+  private confirmationService = inject(ConfirmationService);
   public loading = signal<boolean>(false);
 
   frmInsertStudent: FormGroup;
@@ -84,55 +87,57 @@ export class StudentInsert implements OnInit{
       return;
     }
 
-    this.loading.set(true);
+    confirmAction(this.confirmationService, event, '¿Desea registrar este estudiante?', () => {
+      this.loading.set(true);
 
-    const bodyParams: Registerstudent$Params = {
-      body: {
-        'firstName': this.firstNamefb.value,
-        'surName': this.surNamefb.value,
-        'email': this.emailfb.value,
-        'password': this.passwordfb.value,
-        'code': this.codefb.value,
-        'totalCredits': this.totalCreditsfb.value,
-        'idSchool': this.idSchoolfb.value,
+      const bodyParams: Registerstudent$Params = {
+        body: {
+          'firstName': this.firstNamefb.value,
+          'surName': this.surNamefb.value,
+          'email': this.emailfb.value,
+          'password': this.passwordfb.value,
+          'code': this.codefb.value,
+          'totalCredits': this.totalCreditsfb.value,
+          'idSchool': this.idSchoolfb.value,
+        }
       }
-    }
 
-    this.api.invoke(registerstudent, bodyParams).then((response: any) => {
-      let apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
-      
-      if (apiResponse && apiResponse.type === 'error') {
-        const errorDetail = apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error de validación.';
+      this.api.invoke(registerstudent, bodyParams).then((response: any) => {
+        let apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
+        
+        if (apiResponse && apiResponse.type === 'error') {
+          const errorDetail = apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error de validación.';
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: errorDetail,
+            life: 5000
+          });
+        } else {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Éxito',
+            detail: 'Estudiante registrado correctamente.',
+            life: 3000
+          });
+          this.frmInsertStudent.reset();
+        }
+        this.loading.set(false);
+      }).catch((error) => {
+        let detailMsg = 'Ups. Algo salió mal al registrar al estudiante.';
+        if (error && error.error && error.error.message) {
+          detailMsg += ' ' + error.error.message;
+        } else if (error && error.message) {
+          detailMsg += ' ' + error.message;
+        }
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: errorDetail,
+          detail: detailMsg,
           life: 5000
         });
-      } else {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Éxito',
-          detail: 'Estudiante registrado correctamente.',
-          life: 3000
-        });
-        this.frmInsertStudent.reset();
-      }
-      this.loading.set(false);
-    }).catch((error) => {
-      let detailMsg = 'Ups. Algo salió mal al registrar al estudiante.';
-      if (error && error.error && error.error.message) {
-        detailMsg += ' ' + error.error.message;
-      } else if (error && error.message) {
-        detailMsg += ' ' + error.message;
-      }
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: detailMsg,
-        life: 5000
+        this.loading.set(false);
       });
-      this.loading.set(false);
     });
   }
 }
