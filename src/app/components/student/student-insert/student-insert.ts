@@ -120,10 +120,16 @@ export class StudentInsert implements OnInit{
       }
       this.loading.set(false);
     }).catch((error) => {
+      let detailMsg = 'Ups. Algo salió mal al registrar al estudiante.';
+      if (error && error.error && error.error.message) {
+        detailMsg += ' ' + error.error.message;
+      } else if (error && error.message) {
+        detailMsg += ' ' + error.message;
+      }
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'Ups. Algo salió mal al registrar al estudiante: ' + error,
+        detail: detailMsg,
         life: 5000
       });
       this.loading.set(false);
