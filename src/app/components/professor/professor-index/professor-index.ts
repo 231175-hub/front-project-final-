@@ -1,15 +1,18 @@
 import { ChangeDetectorRef, Component, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { Api } from '../../../api/api';
 import { indexproffesor, deleteproffesor, registerproffesor, Registerproffesor$Params, updateuser } from '../../../api/functions';
+import { confirmAction } from '../../../core/utils/confirm.helper';
 
 interface Column {
   field: string;
@@ -19,10 +22,10 @@ interface Column {
 @Component({
   selector: 'app-professor-index',
   imports: [
-    TableModule, TagModule, FormsModule, ReactiveFormsModule,
-    ButtonModule, DialogModule, ToastModule, InputTextModule, PasswordModule
+    CommonModule, TableModule, TagModule, FormsModule, ReactiveFormsModule,
+    ButtonModule, DialogModule, ToastModule, ConfirmDialogModule, InputTextModule, PasswordModule
   ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   standalone: true,
   templateUrl: './professor-index.html',
   styleUrl: './professor-index.css',
@@ -30,6 +33,7 @@ interface Column {
 export class ProfessorIndex implements OnInit {
 
   private messageService = inject(MessageService);
+  private confirmationService = inject(ConfirmationService);
   public loading = signal<boolean>(false);
 
   listProfessor: any[] = [];
@@ -135,7 +139,7 @@ export class ProfessorIndex implements OnInit {
   }
 
   // Register or Update professor
-  sendInsertProfessor(): void {
+  sendInsertProfessor(event: Event): void {
     if (this.frmInsertProfessor.invalid) {
       this.frmInsertProfessor.markAllAsTouched();
       this.messageService.add({
@@ -147,113 +151,119 @@ export class ProfessorIndex implements OnInit {
       return;
     }
 
-    this.loading.set(true);
+    const message = this.isEditing ? '¿Desea guardar los cambios para este docente?' : '¿Desea registrar este docente?';
 
-    if (this.isEditing) {
-      // Edit mode: use updateuser
-      const updateParams = {
-        idUser: this.selectedProfessorId!,
-        body: {
-          firstName: this.firstNamefb.value,
-          surName: this.surNamefb.value,
-          email: this.emailfb.value
-        }
-      };
+    confirmAction(this.confirmationService, event, message, () => {
+      this.loading.set(true);
 
-      this.api.invoke(updateuser, updateParams).then((response: any) => {
-        const apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
+      if (this.isEditing) {
+        // Edit mode: use updateuser
+        const updateParams = {
+          idUser: this.selectedProfessorId!,
+          body: {
+            firstName: this.firstNamefb.value,
+            surName: this.surNamefb.value,
+            email: this.emailfb.value
+          }
+        };
 
-        if (apiResponse && apiResponse.type === 'error') {
-          const errorDetail = apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error al actualizar.';
+        this.api.invoke(updateuser, updateParams).then((response: any) => {
+          const apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
+
+          if (apiResponse && apiResponse.type === 'error') {
+            const errorDetail = apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error al actualizar.';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: errorDetail,
+              life: 5000
+            });
+          } else {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Docente actualizado correctamente.',
+              life: 3000
+            });
+            this.closeRegisterModal();
+            this.loadProfessors();
+          }
+          this.loading.set(false);
+        }).catch((error) => {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: errorDetail,
+            detail: 'Ups. Algo salió mal: ' + error,
             life: 5000
           });
-        } else {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: 'Docente actualizado correctamente.',
-            life: 3000
-          });
-          this.closeRegisterModal();
-          this.loadProfessors();
-        }
-        this.loading.set(false);
-      }).catch((error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Ups. Algo salió mal: ' + error,
-          life: 5000
+          this.loading.set(false);
         });
-        this.loading.set(false);
-      });
 
-    } else {
-      // Register mode: use registerproffesor
-      const bodyParams: Registerproffesor$Params = {
-        body: {
-          'firstName': this.firstNamefb.value,
-          'surName': this.surNamefb.value,
-          'email': this.emailfb.value,
-          'password': this.passwordfb.value,
-        }
-      };
+      } else {
+        // Register mode: use registerproffesor
+        const bodyParams: Registerproffesor$Params = {
+          body: {
+            'firstName': this.firstNamefb.value,
+            'surName': this.surNamefb.value,
+            'email': this.emailfb.value,
+            'password': this.passwordfb.value,
+          }
+        };
 
-      this.api.invoke(registerproffesor, bodyParams).then((response: any) => {
-        const apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
+        this.api.invoke(registerproffesor, bodyParams).then((response: any) => {
+          const apiResponse = typeof response === 'string' ? JSON.parse(response) : response;
 
-        if (apiResponse && apiResponse.type === 'error') {
-          const errorDetail = apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error de validación.';
+          if (apiResponse && apiResponse.type === 'error') {
+            const errorDetail = apiResponse.listMessage ? apiResponse.listMessage.join(', ') : 'Error de validación.';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: errorDetail,
+              life: 5000
+            });
+          } else {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Éxito',
+              detail: 'Docente registrado correctamente.',
+              life: 3000
+            });
+            this.closeRegisterModal();
+            this.loadProfessors();
+          }
+          this.loading.set(false);
+        }).catch((error) => {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: errorDetail,
+            detail: 'Ups. Algo salió mal: ' + error,
             life: 5000
           });
-        } else {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Éxito',
-            detail: 'Docente registrado correctamente.',
-            life: 3000
-          });
-          this.closeRegisterModal();
-          this.loadProfessors();
-        }
-        this.loading.set(false);
-      }).catch((error) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Ups. Algo salió mal: ' + error,
-          life: 5000
+          this.loading.set(false);
         });
-        this.loading.set(false);
-      });
-    }
+      }
+    });
   }
 
   // Delete professor
   deleteProfessor(event: Event, idProffesor: string): void {
-    this.api.invoke(deleteproffesor, { idProffesor }).then((response: any) => {
-      this.listProfessor = this.listProfessor.filter(prof => prof.idProffesor !== idProffesor);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Éxito',
-        detail: 'Docente eliminado correctamente.',
-        life: 3000
-      });
-      this.cdr.detectChanges();
-    }).catch((error) => {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'No se pudo eliminar el docente.',
-        life: 3000
+    confirmAction(this.confirmationService, event, '¿Está seguro de eliminar este docente?', () => {
+      this.api.invoke(deleteproffesor, { idProffesor }).then((response: any) => {
+        this.listProfessor = this.listProfessor.filter(prof => prof.idProffesor !== idProffesor);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Éxito',
+          detail: 'Docente eliminado correctamente.',
+          life: 3000
+        });
+        this.cdr.detectChanges();
+      }).catch((error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo eliminar el docente.',
+          life: 3000
+        });
       });
     });
   }
