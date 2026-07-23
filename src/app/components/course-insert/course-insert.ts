@@ -90,7 +90,7 @@ export class CourseInsert implements OnInit {
 				nameCourse: this.nameCoursefb.value,
 				category: this.categoryfb.value,
 				idSchool: this.idSchoolfb.value,
-				units: []
+				units: ''
 			}
 		}
 
