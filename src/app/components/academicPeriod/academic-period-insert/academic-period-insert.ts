@@ -114,6 +114,12 @@ export class AcademicPeriodInsert implements OnInit {
     };
   }
 
+  blockNonDigits(event: KeyboardEvent): void {
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   sendInsertAcademicPeriod(event: Event) {
     if (!this.frmInsertAcademicPeriod.valid) {
       this.frmInsertAcademicPeriod.markAllAsTouched();

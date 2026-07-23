@@ -132,6 +132,12 @@ export class AcademicPeriodIndex implements OnInit {
     };
   }
 
+  blockNonDigits(event: KeyboardEvent): void {
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   loadAcademicPeriods(): void {
     this.api.invoke(indexacademicperiod).then((response: any) => {
       const parseResponse = typeof response === 'string' ? JSON.parse(response) : response;

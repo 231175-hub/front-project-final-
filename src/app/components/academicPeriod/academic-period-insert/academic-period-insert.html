@@ -19,8 +19,7 @@
           <label for="anio" class="text-sm font-semibold text-700">
             Año <span class="text-red-500 font-bold">*</span>
           </label>
-          <input type="number" step="1" pattern="^20\d*$" pInputText id="anio" formControlName="yearPeriod"
-            autocomplete="off" placeholder="Ej. 2026" maxlength="4" class="w-full" />
+          <input type="text" maxlength="4" pInputText id="anio" formControlName="yearPeriod" autocomplete="off" placeholder="Ej. 2026" (keypress)="blockNonDigits($event)" class="w-full" />
           @if ((yearPeriodfb.touched || yearPeriodfb.dirty) && yearPeriodfb.errors) {
           @if (yearPeriodfb.hasError('required')) {
           <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
