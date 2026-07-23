@@ -41,14 +41,26 @@ export class StudentInsert implements OnInit{
 
   constructor(private formBuild: FormBuilder, private api: Api, private cdr: ChangeDetectorRef) {
     this.frmInsertStudent = formBuild.group({
-      'firstName': ['', [Validators.required]],
-      'surName': ['', [Validators.required]],
+      'firstName': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
+      'surName': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
       'email': ['', [Validators.required]],
       'password': ['', [Validators.required]],
-      'code': ['', [Validators.required]],
-      'totalCredits': ['', [Validators.required]],
+      'code': ['', [Validators.required, Validators.pattern('^[0-9]{6}$')]],
+      'totalCredits': ['', [Validators.required, Validators.pattern('^[0-9]{1,3}$')]],
       'idSchool': ['', [Validators.required]] 
     });
+  }
+
+  blockNonLetters(event: KeyboardEvent): void {
+    if (!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]$/.test(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  blockNonDigits(event: KeyboardEvent): void {
+    if (!/^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+    }
   }
 
   ngOnInit(): void {
