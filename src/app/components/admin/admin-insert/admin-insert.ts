@@ -30,11 +30,17 @@ export class AdminInsert {
 
   constructor(private formBiulder: FormBuilder, private api: Api) {
     this.frmInsertAdmin = this.formBiulder.group({
-      'firstName': ['', [Validators.required]],
-      'surName': ['', Validators.required],
+      'firstName': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
+      'surName': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
       'email': ['', [Validators.required]],
       'password': ['', [Validators.required]]
     });
+  }
+
+  blockNonLetters(event: KeyboardEvent): void {
+    if (!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]$/.test(event.key)) {
+      event.preventDefault();
+    }
   }
 
   sendInsertAdmin(event: Event){
