@@ -73,6 +73,40 @@ export class AcademicPeriodInsert implements OnInit {
       return;
     }
 
+    const startVal = this.startDatefb.value;
+    const endVal = this.endDatefb.value;
+
+    if (startVal && endVal) {
+      const startDate = new Date(startVal);
+      const endDate = new Date(endVal);
+
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+
+      if (startDate >= endDate) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error de Validación',
+          detail: 'La fecha de inicio debe ser anterior a la fecha de fin.',
+          life: 4000
+        });
+        return;
+      }
+
+      const diffTime = endDate.getTime() - startDate.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 119) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error de Validación',
+          detail: `El periodo académico debe durar al menos 119 días (actualmente dura ${diffDays} días).`,
+          life: 4000
+        });
+        return;
+      }
+    }
+
     confirmAction(this.confirmationService, event, '¿Desea registrar este periodo académico?', () => {
       const bodyParams: Registeracademicperiod$Params = {
         body: {

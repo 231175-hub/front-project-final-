@@ -150,6 +150,66 @@ export class AcademicPeriodIndex implements OnInit {
       return;
     }
 
+    const startVal = this.startDatefb.value;
+    const endVal = this.endDatefb.value;
+
+    if (startVal && endVal) {
+      const startDate = new Date(startVal);
+      const endDate = new Date(endVal);
+
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(0, 0, 0, 0);
+
+      if (startDate >= endDate) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error de Validación',
+          detail: 'La fecha de inicio debe ser anterior a la fecha de fin.',
+          life: 4000
+        });
+        return;
+      }
+
+      const diffTime = endDate.getTime() - startDate.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 119) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error de Validación',
+          detail: `El periodo académico debe durar al menos 119 días (actualmente dura ${diffDays} días).`,
+          life: 4000
+        });
+        return;
+      }
+
+      const isOverlap = this.academicPeriodList.some(existing => {
+        if (this.isEditing && existing.idPeriod === this.selectedPeriodId) {
+          return false;
+        }
+
+        if (existing.status === 'Activo' || existing.status === 'Planificado') {
+          const extStart = new Date(existing.startDate);
+          const extEnd = new Date(existing.endDate);
+          extStart.setHours(0, 0, 0, 0);
+          extEnd.setHours(0, 0, 0, 0);
+
+          return startDate.getTime() <= extEnd.getTime() && endDate.getTime() >= extStart.getTime();
+        }
+        return false;
+      });
+
+      if (isOverlap) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error de Validación',
+          detail: 'El periodo académico se superpone con otro periodo que se encuentra activo o planificado.',
+          life: 4000
+        });
+        return;
+      }
+    }
+
     this.loading = true;
 
     // Convert dates to ISO format or string as expected by backend
@@ -186,10 +246,20 @@ export class AcademicPeriodIndex implements OnInit {
           this.loadAcademicPeriods();
           this.loading = false;
         }).catch((error) => {
+          let detailMsg = 'Error al actualizar el periodo académico.';
+          if (error?.error?.listMessage && error.error.listMessage.length > 0) {
+            detailMsg = error.error.listMessage.join(', ');
+          } else {
+            const errorMsg = error?.error?.message || error?.message || '';
+            if (errorMsg && !errorMsg.includes('Http failure response') && !errorMsg.includes('500')) {
+              detailMsg = errorMsg;
+            }
+          }
           this.messageService.add({
             severity: 'error',
-            summary: 'Exception',
-            detail: 'Ups. Algo salió mal: ' + error
+            summary: 'Error',
+            detail: detailMsg,
+            life: 5000
           });
           this.loading = false;
         });
@@ -217,10 +287,20 @@ export class AcademicPeriodIndex implements OnInit {
           this.loadAcademicPeriods();
           this.loading = false;
         }).catch((error) => {
+          let detailMsg = 'Error al registrar el periodo académico.';
+          if (error?.error?.listMessage && error.error.listMessage.length > 0) {
+            detailMsg = error.error.listMessage.join(', ');
+          } else {
+            const errorMsg = error?.error?.message || error?.message || '';
+            if (errorMsg && !errorMsg.includes('Http failure response') && !errorMsg.includes('500')) {
+              detailMsg = errorMsg;
+            }
+          }
           this.messageService.add({
             severity: 'error',
-            summary: 'Exception',
-            detail: 'Ups. Algo salió mal: ' + error
+            summary: 'Error',
+            detail: detailMsg,
+            life: 5000
           });
           this.loading = false;
         });

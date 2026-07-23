@@ -129,6 +129,7 @@
                 optionLabel="label" 
                 optionValue="value" 
                 placeholder="Seleccione Periodo" 
+                appendTo="body"
                 styleClass="w-full" />
             @if ((numberPeriodfb.touched || numberPeriodfb.dirty) && numberPeriodfb.errors && numberPeriodfb.hasError('required')) {
                 <small class="text-red-500 text-xs">Campo requerido.</small>
@@ -143,6 +144,7 @@
                 dateFormat="dd/mm/yy" 
                 [showIcon]="true" 
                 placeholder="Seleccione Fecha" 
+                appendTo="body"
                 styleClass="w-full" />
             @if ((startDatefb.touched || startDatefb.dirty) && startDatefb.errors && startDatefb.hasError('required')) {
                 <small class="text-red-500 text-xs">Campo requerido.</small>
@@ -157,6 +159,7 @@
                 dateFormat="dd/mm/yy" 
                 [showIcon]="true" 
                 placeholder="Seleccione Fecha" 
+                appendTo="body"
                 styleClass="w-full" />
             @if ((endDatefb.touched || endDatefb.dirty) && endDatefb.errors && endDatefb.hasError('required')) {
                 <small class="text-red-500 text-xs">Campo requerido.</small>
@@ -170,6 +173,7 @@
                 [options]="listStatus" 
                 formControlName="status" 
                 placeholder="Seleccione Estado" 
+                appendTo="body"
                 styleClass="w-full" />
             @if ((statusfb.touched || statusfb.dirty) && statusfb.errors && statusfb.hasError('required')) {
                 <small class="text-red-500 text-xs">Campo requerido.</small>
