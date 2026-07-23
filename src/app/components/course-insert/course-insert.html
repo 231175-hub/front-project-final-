@@ -46,9 +46,14 @@
             <div class="flex flex-column gap-2">
               <label for="credits" class="text-sm font-semibold text-700">Créditos del Curso <span
                   class="text-red-500 font-bold">*</span></label>
-              <input type="number" maxlength="1" step="1" id="credits" pInputText formControlName="credits" placeholder="Número de Créditos" class="w-full" />
-              @if ((creditsfb.touched || creditsfb.dirty) && creditsfb.errors && creditsfb.hasError('required')) {
-              <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+              <input type="text" maxlength="1" id="credits" pInputText formControlName="credits" (keypress)="blockNonDigits($event)" placeholder="Número de Créditos" class="w-full" />
+              @if ((creditsfb.touched || creditsfb.dirty) && creditsfb.errors) {
+                @if (creditsfb.hasError('required')) {
+                  <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+                }
+                @if (creditsfb.hasError('pattern')) {
+                  <small class="text-red-500 text-xs font-medium">Los créditos deben tener como máximo 1 dígito.</small>
+                }
               }
             </div>
 
@@ -56,11 +61,15 @@
             <div class="flex flex-column gap-2">
               <label for="nameCourse" class="text-sm font-semibold text-700">Nombre del Curso <span
                   class="text-red-500 font-bold">*</span></label>
-              <input type="text" id="nameCourse" pInputText formControlName="nameCourse"
+              <input type="text" id="nameCourse" pInputText formControlName="nameCourse" (keypress)="blockNonLetters($event)"
                 placeholder="Nombre de la asignatura" class="w-full" />
-              @if ((nameCoursefb.touched || nameCoursefb.dirty) && nameCoursefb.errors &&
-              nameCoursefb.hasError('required')) {
-              <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+              @if ((nameCoursefb.touched || nameCoursefb.dirty) && nameCoursefb.errors) {
+                @if (nameCoursefb.hasError('required')) {
+                  <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
+                }
+                @if (nameCoursefb.hasError('pattern')) {
+                  <small class="text-red-500 text-xs font-medium">El nombre del curso solo debe contener letras.</small>
+                }
               }
             </div>
 

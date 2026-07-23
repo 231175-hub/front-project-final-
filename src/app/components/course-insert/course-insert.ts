@@ -46,11 +46,23 @@ export class CourseInsert implements OnInit {
 	constructor(private formBuilder: FormBuilder, private api: Api, private cdr: ChangeDetectorRef) {
 		this.frmInsertCourse = this.formBuilder.group({
 			'code': ['', [Validators.required]],
-			'credits': ['', [Validators.required]],
-			'nameCourse': ['', [Validators.required]],
+			'credits': ['', [Validators.required, Validators.pattern('^[0-9]$')]],
+			'nameCourse': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
 			'category': ['', [Validators.required]],
 			'idSchool': ['', Validators.required]
 		});
+	}
+
+	blockNonLetters(event: KeyboardEvent): void {
+		if (!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]$/.test(event.key)) {
+			event.preventDefault();
+		}
+	}
+
+	blockNonDigits(event: KeyboardEvent): void {
+		if (!/^[0-9]$/.test(event.key)) {
+			event.preventDefault();
+		}
 	}
 
 	ngOnInit(): void {
