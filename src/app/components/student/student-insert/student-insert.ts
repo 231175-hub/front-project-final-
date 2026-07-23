@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Api } from '../../../api/api';
 import { indexschool, registerstudent, Registerstudent$Params } from '../../../api/functions';
@@ -19,7 +20,7 @@ interface School {
 
 @Component({
   selector: 'app-student-insert',
-  imports: [ReactiveFormsModule, InputTextModule, FormsModule, PasswordModule, SelectModule, Button, ToastModule, ConfirmDialogModule],
+  imports: [CommonModule, ReactiveFormsModule, InputTextModule, FormsModule, PasswordModule, SelectModule, Button, ToastModule, ConfirmDialogModule],
   providers: [MessageService, ConfirmationService],
   templateUrl: './student-insert.html',
   styleUrl: './student-insert.css',
