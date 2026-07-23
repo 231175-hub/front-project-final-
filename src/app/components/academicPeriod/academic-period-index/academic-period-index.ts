@@ -71,7 +71,7 @@ export class AcademicPeriodIndex implements OnInit {
     ];
 
     this.frmAcademicPeriod = this.formBuilder.group({
-      'yearPeriod': ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]],
+      'yearPeriod': ['', [Validators.required, Validators.pattern('^20[0-9]{2}$')]],
       'numberPeriod': [null, [Validators.required]],
       'startDate': [null, Validators.required],
       'endDate': [null, Validators.required],

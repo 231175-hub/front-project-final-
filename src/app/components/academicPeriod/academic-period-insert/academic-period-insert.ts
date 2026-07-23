@@ -42,7 +42,7 @@ export class AcademicPeriodInsert implements OnInit {
 
   constructor(private formBuilder: FormBuilder, private api: Api) {
     this.frmInsertAcademicPeriod = this.formBuilder.group({
-      'yearPeriod': ['', [Validators.required, Validators.pattern('^[0-9]{4}$')]],
+      'yearPeriod': ['', [Validators.required, Validators.pattern('^20[0-9]{2}$')]],
       'numberPeriod': ['', [Validators.required]],
       'startDate': [null, Validators.required],
       'endDate': [null, [Validators.required]],
