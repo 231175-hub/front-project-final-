@@ -1,4 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, Validators, ɵInternalFormsSharedModule, ReactiveFormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -6,7 +7,9 @@ import { Api } from '../../api/api';
 import { indexschool, registercourse, Registercourse$Params } from '../../api/functions';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { confirmAction } from '../../core/utils/confirm.helper';
 import { inject } from '@angular/core';
 
 interface Category {
@@ -15,8 +18,8 @@ interface Category {
 
 @Component({
   selector: 'app-course-insert',
-  imports: [ButtonModule, InputTextModule, ɵInternalFormsSharedModule, ReactiveFormsModule, SelectModule, ToastModule],
-  providers: [MessageService],
+  imports: [CommonModule, ButtonModule, InputTextModule, ɵInternalFormsSharedModule, ReactiveFormsModule, SelectModule, ToastModule, ConfirmDialogModule],
+  providers: [MessageService, ConfirmationService],
   standalone: true,
   templateUrl: './course-insert.html',
   styleUrl: './course-insert.css',
@@ -24,6 +27,7 @@ interface Category {
 export class CourseInsert implements OnInit {
 
 	private messageService = inject(MessageService);
+	private confirmationService = inject(ConfirmationService);
 
 	get codefb() {return this.frmInsertCourse.controls['code']};
 	get creditsfb() {return this.frmInsertCourse.controls['credits']};
@@ -83,34 +87,36 @@ export class CourseInsert implements OnInit {
 			return;
 		}
 
-		const bodyParams: Registercourse$Params = {
-			body: {
-				code: this.codefb.value,
-				credits: Number(this.creditsfb.value),
-				nameCourse: this.nameCoursefb.value,
-				category: this.categoryfb.value,
-				idSchool: this.idSchoolfb.value,
-				units: ''
+		confirmAction(this.confirmationService, event, '¿Desea registrar este curso?', () => {
+			const bodyParams: Registercourse$Params = {
+				body: {
+					code: this.codefb.value,
+					credits: Number(this.creditsfb.value),
+					nameCourse: this.nameCoursefb.value,
+					category: this.categoryfb.value,
+					idSchool: this.idSchoolfb.value,
+					units: ''
+				}
 			}
-		}
 
-		this.api.invoke(registercourse, bodyParams).then((response: any) => {
-			let apiResponse = typeof response === "string" ? JSON.parse(response) : response;
-			this.messageService.add({
-				severity: 'success',
-				summary: 'Éxito',
-				detail: 'Curso registrado correctamente.',
-				life: 3000
-			});
-			this.frmInsertCourse.reset();
-			this.cdr.detectChanges();
-		}).catch((err) => {
-			console.error("Error al registrar el curso:", err);
-			this.messageService.add({
-				severity: 'error',
-				summary: 'Error',
-				detail: 'Ups. Algo salió mal al registrar el curso.',
-				life: 3000
+			this.api.invoke(registercourse, bodyParams).then((response: any) => {
+				let apiResponse = typeof response === "string" ? JSON.parse(response) : response;
+				this.messageService.add({
+					severity: 'success',
+					summary: 'Éxito',
+					detail: 'Curso registrado correctamente.',
+					life: 3000
+				});
+				this.frmInsertCourse.reset();
+				this.cdr.detectChanges();
+			}).catch((err) => {
+				console.error("Error al registrar el curso:", err);
+				this.messageService.add({
+					severity: 'error',
+					summary: 'Error',
+					detail: 'Ups. Algo salió mal al registrar el curso.',
+					life: 3000
+				});
 			});
 		});
 	}

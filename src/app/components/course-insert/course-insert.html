@@ -1,4 +1,14 @@
 <p-toast></p-toast>
+<p-confirmdialog>
+  <ng-template #message let-message>
+    @if (message) {
+    <div class="flex flex-column align-items-center w-full gap-3 p-3">
+      <i [ngClass]="message.icon" class="text-5xl text-primary-500"></i>
+      <p class="text-base text-700 m-0">{{ message.message }}</p>
+    </div>
+    }
+  </ng-template>
+</p-confirmdialog>
 <div class="flex justify-content-center my-6 px-3">
   <div class="surface-card border-1 surface-border shadow-2 border-round-2xl overflow-hidden w-full"
     style="width: 100%; max-width: 600px;">
