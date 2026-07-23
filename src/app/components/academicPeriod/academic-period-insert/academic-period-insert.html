@@ -67,6 +67,17 @@
           @if ((endDatefb.touched || endDatefb.dirty) && endDatefb.errors && endDatefb.hasError('required')) {
           <small class="text-red-500 text-xs font-medium">Campo requerido.</small>
           }
+          @if ((startDatefb.touched || endDatefb.touched || startDatefb.dirty || endDatefb.dirty) && frmInsertAcademicPeriod.errors) {
+            @if (frmInsertAcademicPeriod.hasError('dateOrderInvalid')) {
+              <small class="text-red-500 text-xs font-medium">La fecha de inicio debe ser anterior a la fecha de fin.</small>
+            }
+            @if (frmInsertAcademicPeriod.hasError('durationInvalid')) {
+              <small class="text-red-500 text-xs font-medium">El periodo académico debe durar al menos 119 días.</small>
+            }
+            @if (frmInsertAcademicPeriod.hasError('overlapInvalid')) {
+              <small class="text-red-500 text-xs font-medium">El periodo académico se superpone con otro periodo que se encuentra activo o planificado.</small>
+            }
+          }
         </div>
 
         <!-- Estado -->
