@@ -80,10 +80,16 @@ export class SchoolIndex implements OnInit {
 
 	ngOnInit(): void {
 		this.frmInsertSchool = this.formBuilder.group({
-			'nameSchool': ['', [Validators.required]],
+			'nameSchool': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
 			'imageSchool': [null, Validators.required]
 		});
 		this.loadSchools();
+	}
+
+	blockNonLetters(event: KeyboardEvent): void {
+		if (!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]$/.test(event.key)) {
+			event.preventDefault();
+		}
 	}
 
 	loadSchools(): void {

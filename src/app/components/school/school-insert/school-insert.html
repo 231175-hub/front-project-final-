@@ -15,10 +15,15 @@
           Nombre de la Escuela <span class="text-red-500">*</span>
         </label>
         <input type="text" id="nameSchool" pInputText formControlName="nameSchool"
-          placeholder="Ej. Ingeniería de Sistemas" pattern="[A-Za-z\s]+" class="w-full"
+          placeholder="Ej. Ingeniería de Sistemas" (keypress)="blockNonLetters($event)" class="w-full"
           style="border: 1px solid var(--surface-border); border-radius: 6px; padding: 10px;" />
-        @if ((nameSchoolfb.touched || nameSchoolfb.dirty) && nameSchoolfb.errors && nameSchoolfb.hasError('required')) {
-        <small class="p-error text-xs">Campo requerido.</small>
+        @if ((nameSchoolfb.touched || nameSchoolfb.dirty) && nameSchoolfb.errors) {
+          @if (nameSchoolfb.hasError('required')) {
+            <small class="p-error text-xs text-red-500">Campo requerido.</small>
+          }
+          @if (nameSchoolfb.hasError('pattern')) {
+            <small class="p-error text-xs text-red-500">El nombre de la escuela solo debe contener letras.</small>
+          }
         }
       </div>
 

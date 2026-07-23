@@ -40,9 +40,15 @@ export class SchoolInsert{
 
   constructor(private formBuilder: FormBuilder, private api: Api){
     this.frmInsertSchool = formBuilder.group({
-      'nameSchool': ['', [Validators.required]],
+      'nameSchool': ['', [Validators.required, Validators.pattern('^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]*$')]],
       'imageSchool': [Blob, Validators.required]
     });
+  }
+
+  blockNonLetters(event: KeyboardEvent): void {
+    if (!/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ ]$/.test(event.key)) {
+      event.preventDefault();
+    }
   }
 
   sendInsertSchool(event: Event): void{
