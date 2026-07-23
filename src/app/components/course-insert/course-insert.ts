@@ -31,16 +31,8 @@ export class CourseInsert implements OnInit {
 	get idSchoolfb() {return this.frmInsertCourse.controls['idSchool']};
 	get categoryfb() {return this.frmInsertCourse.controls['category']};
 
-	unitQuantity: number = 0;
-	unitRowList: any[] = [];
-	listUnid: any[] = [];
-	unitsTouched: boolean = false;
-
 	listSchool: [] = [];
-
-
 	categories: Category[] = [];
-
 	frmInsertCourse: FormGroup;
 
 	constructor(private formBuilder: FormBuilder, private api: Api, private cdr: ChangeDetectorRef) {
@@ -73,62 +65,23 @@ export class CourseInsert implements OnInit {
 			this.cdr.detectChanges();
 		});
 
-
-
 		this.categories = [ 
 			{ category: 'AFPO'},
 			{ category: 'AFPE' }
 		];
 	}
 
-  	addUnit(): void {
-
-		this.unitQuantity = this.unitRowList.length + 1;
-
-		this.unitRowList.push({
-			'id': 'Unidad ' + this.unitQuantity
-		});
-	}
-
-  	removeUnit(element: any): void {
-		let positionTemp = this.unitRowList.indexOf(element);
-		if (positionTemp !== -1) {
-			this.unitRowList.splice(positionTemp, 1);		
-		}
-
-		let indexTemp = this.listUnid.findIndex((value) => value.name === element.id);
-		if (indexTemp !== -1) {
-			this.listUnid.splice(indexTemp, 1);
-		}
-
-		this.unitRowList.forEach((item, index) => {
-			const newValue = 'Unidad ' + (index + 1);
-
-			let listUnidItem = this.listUnid.find(val => val.name === item.id);
-			if (listUnidItem) {
-				listUnidItem.name = newValue;
-			}
-
-			item.id = newValue;
-		})
-
-		this.unitQuantity = this.unitRowList.length;
-	}
-
 	sendInsertCourse(event: Event) {
-		this.unitsTouched = true;
-		if (this.frmInsertCourse.invalid || this.unitRowList.length === 0) {
+		if (this.frmInsertCourse.invalid) {
 			this.frmInsertCourse.markAllAsTouched();
 			this.messageService.add({
 				severity: 'error',
 				summary: 'Error',
-				detail: 'Complete todos los campos obligatorios y agregue al menos una unidad.',
+				detail: 'Complete todos los campos obligatorios.',
 				life: 3000
 			});
 			return;
 		}
-
-		const numbers = this.unitRowList.map((item, index) => index + 1);
 
 		const bodyParams: Registercourse$Params = {
 			body: {
@@ -137,7 +90,7 @@ export class CourseInsert implements OnInit {
 				nameCourse: this.nameCoursefb.value,
 				category: this.categoryfb.value,
 				idSchool: this.idSchoolfb.value,
-				units: numbers as any
+				units: []
 			}
 		}
 
@@ -150,9 +103,6 @@ export class CourseInsert implements OnInit {
 				life: 3000
 			});
 			this.frmInsertCourse.reset();
-			this.unitRowList = [];
-			this.unitQuantity = 0;
-			this.unitsTouched = false;
 			this.cdr.detectChanges();
 		}).catch((err) => {
 			console.error("Error al registrar el curso:", err);
