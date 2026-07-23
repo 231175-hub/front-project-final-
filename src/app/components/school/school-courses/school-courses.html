@@ -1,3 +1,16 @@
+<p-toast [life]="2000"></p-toast>
+
+<p-confirmdialog>
+  <ng-template #message let-message>
+    @if (message) {
+    <div class="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border p-4">
+      <i [ngClass]="message.icon" class="text-5xl text-primary"></i>
+      <p class="text-base text-700 m-0">{{ message.message }}</p>
+    </div>
+    }
+  </ng-template>
+</p-confirmdialog>
+
 <div class="flex flex-column gap-4 p-4">
   
   <!-- Back navigation and header info -->
@@ -21,8 +34,9 @@
         <tr>
           <th class="text-center font-bold" style="width: 15%;">Código</th>
           <th class="font-bold" style="width: 30%;">Nombre del Curso</th>
-          <th class="text-center font-bold" style="width: 10%;">Créditos</th>
-          <th class="text-center font-bold" style="width: 15%;">Categoría</th>
+          <th class="text-center font-bold" style="width: 15%;">Créditos</th>
+          <th class="text-center font-bold" style="width: 20%;">Categoría</th>
+          <th class="text-center font-bold" style="width: 20%;">Acciones</th>
         </tr>
       </ng-template>
 
@@ -32,9 +46,31 @@
           <td class="font-medium text-900">{{ course.nameCourse }}</td>
           <td class="text-center">{{ course.credits }}</td>
           <td class="text-center">
-            <span class="p-tag font-semibold px-2 py-1 border-round-md bg-blue-50 text-blue-700 border-1 border-blue-200">
+            <span *ngIf="course.category" class="p-tag font-semibold px-2 py-1 border-round-md bg-blue-50 text-blue-700 border-1 border-blue-200">
               {{ course.category }}
             </span>
+          </td>
+          <td class="text-center">
+            <div class="flex justify-content-center gap-2">
+              <p-button 
+                icon="pi pi-pencil" 
+                label="Editar" 
+                [outlined]="true" 
+                severity="info" 
+                size="small" 
+                (click)="openEditDialog(course)" 
+                tooltipPosition="top" 
+                pTooltip="Editar Curso" />
+              <p-button 
+                icon="pi pi-trash" 
+                label="Eliminar" 
+                [outlined]="true" 
+                severity="danger" 
+                size="small" 
+                (click)="delete(course.idCourse, $event)" 
+                tooltipPosition="top" 
+                pTooltip="Eliminar Curso" />
+            </div>
           </td>
         </tr>
       </ng-template>
@@ -42,7 +78,7 @@
       <!-- Empty state -->
       <ng-template #emptymessage>
         <tr>
-          <td colspan="4" class="text-center py-6 text-500">
+          <td colspan="5" class="text-center py-6 text-500">
             <i class="pi pi-book text-4xl text-300 mb-3 block"></i>
             No hay cursos registrados para esta escuela profesional.
           </td>
@@ -52,3 +88,69 @@
   </div>
 
 </div>
+
+<!-- Register/Edit Course Dialog -->
+<p-dialog [(visible)]="displayEditDialog" header="Editar Curso" [modal]="true" [style]="{ width: '550px' }" [draggable]="false" [resizable]="false">
+    <form [formGroup]="frmUpdateCourse" class="flex flex-column gap-4 pt-3">
+      
+      <!-- Código del Curso -->
+      <div class="flex flex-column gap-2">
+        <label for="code" class="font-semibold text-800 text-sm">
+          Código del Curso <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="code" pInputText formControlName="code" placeholder="Código (ej: INF-101)" style="text-transform: uppercase; border: 1px solid var(--surface-border); border-radius: 6px; padding: 10px;" class="w-full" />
+        @if ((codefb.touched || codefb.dirty) && codefb.errors && codefb.hasError('required')) {
+          <small class="p-error text-xs text-red-500">Campo requerido.</small>
+        }
+      </div>
+
+      <!-- Créditos del Curso -->
+      <div class="flex flex-column gap-2">
+        <label for="credits" class="font-semibold text-800 text-sm">
+          Créditos del Curso <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="credits" maxlength="1" pInputText formControlName="credits" (keypress)="blockNonDigits($event)" placeholder="Número de Créditos" style="border: 1px solid var(--surface-border); border-radius: 6px; padding: 10px;" class="w-full" />
+        @if ((creditsfb.touched || creditsfb.dirty) && creditsfb.errors) {
+          @if (creditsfb.hasError('required')) {
+            <small class="p-error text-xs text-red-500">Campo requerido.</small>
+          }
+          @if (creditsfb.hasError('pattern')) {
+            <small class="p-error text-xs text-red-500">Los créditos deben tener como máximo 1 dígito.</small>
+          }
+        }
+      </div>
+
+      <!-- Nombre del Curso -->
+      <div class="flex flex-column gap-2">
+        <label for="nameCourse" class="font-semibold text-800 text-sm">
+          Nombre del Curso <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="nameCourse" pInputText formControlName="nameCourse" (keypress)="blockNonLetters($event)" placeholder="Nombre de la asignatura" style="border: 1px solid var(--surface-border); border-radius: 6px; padding: 10px;" class="w-full" />
+        @if ((nameCoursefb.touched || nameCoursefb.dirty) && nameCoursefb.errors) {
+          @if (nameCoursefb.hasError('required')) {
+            <small class="p-error text-xs text-red-500">Campo requerido.</small>
+          }
+          @if (nameCoursefb.hasError('pattern')) {
+            <small class="p-error text-xs text-red-500">El nombre del curso solo debe contener letras.</small>
+          }
+        }
+      </div>
+
+      <!-- Categoría del Curso -->
+      <div class="flex flex-column gap-2">
+        <label for="category" class="font-semibold text-800 text-sm">
+          Categoría del Curso <span class="text-red-500">*</span>
+        </label>
+        <p-select [options]="categories" id="category" formControlName="category" optionLabel="category"
+          optionValue="category" placeholder="Selecciona una categoría" class="w-full" styleClass="w-full" />
+        @if ((categoryfb.touched || categoryfb.dirty) && categoryfb.errors && categoryfb.hasError('required')) {
+          <small class="p-error text-xs text-red-500">Campo requerido.</small>
+        }
+      </div>
+      
+      <div class="flex justify-content-end gap-3 border-top-1 surface-border pt-4">
+        <p-button label="Cancelar" severity="secondary" (click)="displayEditDialog = false" />
+        <p-button label="Guardar Cambios" icon="pi pi-check" (click)="updateCourse($event)" [disabled]="!frmUpdateCourse.valid" />
+      </div>
+    </form>
+</p-dialog>
