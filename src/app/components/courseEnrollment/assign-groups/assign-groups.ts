@@ -9,11 +9,11 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { confirmAction } from '../../../core/utils/confirm.helper';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-assign-groups',
-  imports: [FormsModule, ReactiveFormsModule, SelectModule, AutoCompleteModule, ButtonModule, ToastModule, ConfirmDialogModule, NgClass],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, SelectModule, AutoCompleteModule, ButtonModule, ToastModule, ConfirmDialogModule],
   providers: [MessageService, ConfirmationService],
   standalone: true,
   templateUrl: './assign-groups.html',
